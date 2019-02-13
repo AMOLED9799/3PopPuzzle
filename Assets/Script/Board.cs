@@ -11,8 +11,7 @@ public class Board : MonoBehaviour {
 
 	public GameObject[] dots;
 	public GameObject [,] allDots;
-
-
+	rhatnsdl b
 	void Start () {
 		allTiles = new BackgroundTile[width, height];
 		allDots = new GameObject[width, height];
@@ -56,6 +55,17 @@ public class Board : MonoBehaviour {
 			}
 
 		return false;
+	}
+		
+	private bool waitForAction = false;
+
+	public bool CheckForAction() {
+		for (int _row = 0; _row < height; _row++) {
+			for (int _column = 0; _column < width; _column++) {
+				waitForAction = allDots [_row, _column].GetComponent<Dot> ().dropping;
+			}
+		}
+		return waitForAction;
 	}
 }
 

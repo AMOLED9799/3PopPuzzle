@@ -7,6 +7,7 @@ public class Dot : MonoBehaviour {
 	private Vector2 firstTouchPosition;
 	private Vector2 finalTouchPosition;
 	private GameObject otherDot;
+	private GameObject tempDot;
 	private Board board;
 	private Vector2 targetPosition;
 
@@ -14,23 +15,42 @@ public class Dot : MonoBehaviour {
 	public int column;
 	public int row;
 	public float swipeResist = 1f;
-	public bool swipeing;
+
+	public bool swipeing = false;
+	public bool dropping = false;
+
+	private bool waitForActionResult = false;
+
 	private Vector2 velocity = Vector2.zero;
 
-	// Use this for initialization
+	public bool isMatched = false;
+
 	void Start () {
 		board = FindObjectOfType<Board> ();
-		swipeing = false;
 	}
 
-	// Update is called once per fra
 	void Update () {
-		if (swipeing) {
+		if (swipeing) {		// change position of Dots
 			transform.position = Vector2.SmoothDamp (transform.position, new Vector2 (column, row), ref velocity, 0.3f, 10f, Time.deltaTime);
-			if (transform.position.x == column && transform.position.y == row) {
+			if (Mathf.Abs(transform.position.x - column) < 0.05f && Mathf.Abs(transform.position.y - row) < 0.05f) {
+				transform.position = new Vector2 (column, row);
 				swipeing = false;
+				if (dropping) {
+					board.allDots [column, row] = this.gameObject;
+					board.allDots [column, row + 1] = null;
+					dropping = false;
+				}
 			}
 		}
+			
+		if (!swipeing && !waitForActionResult) {
+			CheckMatch ();
+		}
+
+		DestoryDot ();
+
+		//waitForActionResult = board.CheckForAction ();
+		DropDot ();
 	} 
 
 	private void OnMouseDown() {
@@ -68,7 +88,52 @@ public class Dot : MonoBehaviour {
 			otherDot.GetComponent<Dot> ().column += 1;
 			column -= 1;
 		}
+
+		tempDot = otherDot;
+		board.allDots [column, row] = this.gameObject;
+		board.allDots [otherDot.GetComponent<Dot> ().column, otherDot.GetComponent<Dot> ().row] = tempDot;
+		tempDot = null;
+
 		swipeing = true;
 		otherDot.GetComponent<Dot> ().swipeing = true;
+	}
+
+	private void CheckMatch()
+	{
+		if (column < board.width - 2) {
+			if (board.allDots [column + 1, row] != null && board.allDots [column + 2, row] != null) {
+				if (transform.tag == board.allDots [column + 1, row].tag && transform.tag == board.allDots [column + 2, row].tag) {
+					isMatched = true;
+					board.allDots [column + 1, row].GetComponent<Dot> ().isMatched = true;
+					board.allDots [column + 2, row].GetComponent<Dot> ().isMatched = true;
+				}
+			}
+		}
+
+		if (row < board.height - 2) {
+			if (board.allDots [column, row + 1] != null && board.allDots [column, row + 2] != null) {
+				if (transform.tag == board.allDots [column, row + 1].tag && transform.tag == board.allDots [column, row + 2].tag) {
+					isMatched = true;
+					board.allDots [column, row + 1].GetComponent<Dot> ().isMatched = true;
+					board.allDots [column, row + 2].GetComponent<Dot> ().isMatched = true;
+				}
+			}
+		}
+	}
+
+	private void DestoryDot() 
+	{
+		if (isMatched) {
+			board.allDots [column, row] = null;
+			Destroy(this.gameObject,0.3f);
+		}
+	}
+
+	private void DropDot() {
+		if (board.allDots [column, row - 1] == null) {
+			dropping = true;
+			swipeing = true;
+			row -= 1;
+		}
 	}
 }
