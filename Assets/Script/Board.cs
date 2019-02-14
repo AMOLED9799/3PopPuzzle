@@ -9,15 +9,18 @@ public class Board : MonoBehaviour {
 	public GameObject tilePrefab;
 	public BackgroundTile[,] allTiles;
 
+	public bool desTriggered = false;
+
 	public GameObject[] dots;
 	public GameObject [,] allDots;
-	rhatnsdl b
+
 	void Start () {
 		allTiles = new BackgroundTile[width, height];
 		allDots = new GameObject[width, height];
 
 		SetUp ();
-		
+
+		StartCoroutine (CountNulls ());
 	}
 	
 	private void SetUp() {
@@ -45,6 +48,7 @@ public class Board : MonoBehaviour {
 		}
 	}
 
+	// 생성 당시 겹치는 게 없도록 설정
 	private bool MatchesAt(int column, int row, GameObject piece) {
 			if (column > 1 && allDots [column - 1, row].tag == piece.tag && allDots [column - 2, row].tag == piece.tag) {
 				return true;
@@ -56,16 +60,23 @@ public class Board : MonoBehaviour {
 
 		return false;
 	}
-		
-	private bool waitForAction = false;
 
-	public bool CheckForAction() {
-		for (int _row = 0; _row < height; _row++) {
-			for (int _column = 0; _column < width; _column++) {
-				waitForAction = allDots [_row, _column].GetComponent<Dot> ().dropping;
+	IEnumerator CountNulls() {
+		if (desTriggered) {
+			Debug.Log ("HE");
+			for (int i = 0; i < width; i++) {
+				int countNull = 0;
+				for (int j = 0; j < height; j++) {
+					if (allDots [i, j] == null) {
+						countNull++;
+					} else if (countNull > 0) {
+						allDots [i, j].GetComponent<Dot> ().nullUnderMe = 0;
+					}
+				}
 			}
+			desTriggered = false;
 		}
-		return waitForAction;
+		yield return null;
 	}
 }
 

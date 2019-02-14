@@ -19,7 +19,7 @@ public class Dot : MonoBehaviour {
 	public bool swipeing = false;
 	public bool dropping = false;
 
-	private bool waitForActionResult = false;
+	public int nullUnderMe = 0;
 
 	private Vector2 velocity = Vector2.zero;
 
@@ -29,29 +29,28 @@ public class Dot : MonoBehaviour {
 		board = FindObjectOfType<Board> ();
 	}
 
+	//*****************************************
 	void Update () {
-		if (swipeing) {		// change position of Dots
+
+		// swipe position of Dots
+		if (swipeing) {		
 			transform.position = Vector2.SmoothDamp (transform.position, new Vector2 (column, row), ref velocity, 0.3f, 10f, Time.deltaTime);
-			if (Mathf.Abs(transform.position.x - column) < 0.05f && Mathf.Abs(transform.position.y - row) < 0.05f) {
+			if (Mathf.Abs (transform.position.x - column) < 0.05f && Mathf.Abs (transform.position.y - row) < 0.05f) {
 				transform.position = new Vector2 (column, row);
 				swipeing = false;
-				if (dropping) {
-					board.allDots [column, row] = this.gameObject;
-					board.allDots [column, row + 1] = null;
-					dropping = false;
-				}
 			}
-		}
-			
-		if (!swipeing && !waitForActionResult) {
+		} 
+		
+		// drop Dot to bottom way
+
+		if (!swipeing) {
 			CheckMatch ();
 		}
 
 		DestoryDot ();
-
-		//waitForActionResult = board.CheckForAction ();
-		DropDot ();
-	} 
+		 
+	}
+	//*****************************************
 
 	private void OnMouseDown() {
 		firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -125,15 +124,8 @@ public class Dot : MonoBehaviour {
 	{
 		if (isMatched) {
 			board.allDots [column, row] = null;
+			board.desTriggered = true;
 			Destroy(this.gameObject,0.3f);
-		}
-	}
-
-	private void DropDot() {
-		if (board.allDots [column, row - 1] == null) {
-			dropping = true;
-			swipeing = true;
-			row -= 1;
 		}
 	}
 }
