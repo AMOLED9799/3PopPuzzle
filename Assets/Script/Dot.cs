@@ -18,6 +18,7 @@ public class Dot : MonoBehaviour {
 
 	public bool swipeing = false;
 	public bool dropping = false;
+	public bool checkIsDone = false;
 
 	public int nullUnderMe = 0;
 
@@ -31,7 +32,7 @@ public class Dot : MonoBehaviour {
 
 	//*****************************************
 	void Update () {
-
+		
 		// swipe position of Dots
 		if (swipeing) {		
 			transform.position = Vector2.SmoothDamp (transform.position, new Vector2 (column, row), ref velocity, 0.3f, 10f, Time.deltaTime);
@@ -40,14 +41,14 @@ public class Dot : MonoBehaviour {
 				swipeing = false;
 			}
 		} 
+
+		StartCoroutine(CheckMatch());
+
+		DestroyDots ();
 		
 		// drop Dot to bottom way
 
-		if (!swipeing) {
-			CheckMatch ();
-		}
 
-		DestoryDot ();
 		 
 	}
 	//*****************************************
@@ -97,35 +98,40 @@ public class Dot : MonoBehaviour {
 		otherDot.GetComponent<Dot> ().swipeing = true;
 	}
 
-	private void CheckMatch()
-	{
-		if (column < board.width - 2) {
-			if (board.allDots [column + 1, row] != null && board.allDots [column + 2, row] != null) {
+	IEnumerator CheckMatch() {
+		if (column <= board.width - 3) {
+			if (board.allDots [column, row] != null && board.allDots [column + 1, row] != null && board.allDots [column + 2, row] != null) {
 				if (transform.tag == board.allDots [column + 1, row].tag && transform.tag == board.allDots [column + 2, row].tag) {
 					isMatched = true;
 					board.allDots [column + 1, row].GetComponent<Dot> ().isMatched = true;
 					board.allDots [column + 2, row].GetComponent<Dot> ().isMatched = true;
+					new WaitForSeconds (0.7f);
+
 				}
 			}
 		}
 
-		if (row < board.height - 2) {
-			if (board.allDots [column, row + 1] != null && board.allDots [column, row + 2] != null) {
+		if (row <= board.height - 3) {
+			if (board.allDots [column, row] != null && board.allDots [column, row + 1] != null && board.allDots [column, row + 2] != null) {
 				if (transform.tag == board.allDots [column, row + 1].tag && transform.tag == board.allDots [column, row + 2].tag) {
 					isMatched = true;
 					board.allDots [column, row + 1].GetComponent<Dot> ().isMatched = true;
 					board.allDots [column, row + 2].GetComponent<Dot> ().isMatched = true;
+					new WaitForSeconds (0.7f);
+
 				}
 			}
 		}
+
+		yield return null;
 	}
 
-	private void DestoryDot() 
-	{
+	private void DestroyDots() { 
 		if (isMatched) {
 			board.allDots [column, row] = null;
-			board.desTriggered = true;
-			Destroy(this.gameObject,0.3f);
+			Destroy (this.gameObject, 0.5f);
 		}
 	}
+
+
 }

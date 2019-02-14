@@ -9,8 +9,6 @@ public class Board : MonoBehaviour {
 	public GameObject tilePrefab;
 	public BackgroundTile[,] allTiles;
 
-	public bool desTriggered = false;
-
 	public GameObject[] dots;
 	public GameObject [,] allDots;
 
@@ -19,8 +17,6 @@ public class Board : MonoBehaviour {
 		allDots = new GameObject[width, height];
 
 		SetUp ();
-
-		StartCoroutine (CountNulls ());
 	}
 	
 	private void SetUp() {
@@ -62,21 +58,20 @@ public class Board : MonoBehaviour {
 	}
 
 	IEnumerator CountNulls() {
-		if (desTriggered) {
-			Debug.Log ("HE");
+		while (true) {
+			int nullCount = 0;
 			for (int i = 0; i < width; i++) {
-				int countNull = 0;
 				for (int j = 0; j < height; j++) {
 					if (allDots [i, j] == null) {
-						countNull++;
-					} else if (countNull > 0) {
-						allDots [i, j].GetComponent<Dot> ().nullUnderMe = 0;
+						nullCount++;
+					} else if (nullCount > 0) {
+						allDots [i, j].GetComponent<Dot> ().row -= nullCount;
 					}
 				}
+				nullCount = 0;
 			}
-			desTriggered = false;
 		}
-		yield return null;
+		yield return new WaitForSeconds (0.4f);
 	}
 }
 
