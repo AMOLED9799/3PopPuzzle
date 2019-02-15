@@ -18,7 +18,6 @@ public class Dot : MonoBehaviour {
 
 	public bool swipeing = false;
 	public bool dropping = false;
-	public bool checkIsDone = false;
 
 	public int nullUnderMe = 0;
 
@@ -36,20 +35,40 @@ public class Dot : MonoBehaviour {
 		// swipe position of Dots
 		if (swipeing) {		
 			transform.position = Vector2.SmoothDamp (transform.position, new Vector2 (column, row), ref velocity, 0.3f, 10f, Time.deltaTime);
-			Debug.Log ("Here");
 			if (Mathf.Abs (transform.position.x - column) < 0.05f && Mathf.Abs (transform.position.y - row) < 0.05f) {
 				transform.position = new Vector2 (column, row);
 				swipeing = false;
-				Debug.Log ("Right");
-				board.CheckMatch ();
+
+				board.needChecking = true;
 			}
 		} 
-		DestroyDots ();
-		
+			
+		// match
+		if (board.needChecking) {
+			board.MatchChecker ();
+			new WaitForSeconds (0.3f);
+		}
+
+		if (isMatched) {
+			StartCoroutine (DestroyDots ());
+		}
 		// drop Dot to bottom way
 
+		if (dropping) {
+			transform.position = Vector2.SmoothDamp (transform.position, new Vector2 (column, row - nullUnderMe), ref velocity, 0.3f, 10f, Time.deltaTime);
+			if (Mathf.Abs (transform.position.y - (row - nullUnderMe)) < 0.05f) {
+				transform.position = new Vector2 (column, row - nullUnderMe);
+				board.allDots [column, row - nullUnderMe] = this.gameObject;
+				board.allDots [column, row] = null;
+				row = row - nullUnderMe;
+				nullUnderMe = 0;
+				dropping = false;
 
-		 
+				board.needChecking = true;
+			}
+		}
+
+		board.CountNullUnder();		 
 	}
 	//*****************************************
 
@@ -72,19 +91,19 @@ public class Dot : MonoBehaviour {
 
 	void MovePoint() {
 		if (swipeAngle > -35 && swipeAngle <= 35 && column < board.width-1) {			// move to Right
-			otherDot = board.allDots[column + 1, row];
+			otherDot = board.allDots[column + 1, row].gameObject;
 			otherDot.GetComponent<Dot> ().column -= 1;
 			column += 1;
 		} else if (swipeAngle > 35 && swipeAngle <= 65 && row < board.height-1) {	// move to Upward
-			otherDot = board.allDots[column, row + 1];
+			otherDot = board.allDots[column, row + 1].gameObject;
 			otherDot.GetComponent<Dot> ().row -= 1;
 			row += 1;
 		} else if (swipeAngle > -65 && swipeAngle <= -35 && row > 0) {	// move to Downward
-			otherDot = board.allDots[column, row-1];
+			otherDot = board.allDots[column, row-1].gameObject;
 			otherDot.GetComponent<Dot> ().row += 1;
 			row -= 1;
 		} else if ((swipeAngle < -65 || swipeAngle > 65) && column > 0) {	// move to Left
-			otherDot = board.allDots[column - 1, row];
+			otherDot = board.allDots[column - 1, row].gameObject;
 			otherDot.GetComponent<Dot> ().column += 1;
 			column -= 1;
 		}
@@ -99,12 +118,14 @@ public class Dot : MonoBehaviour {
 	}
 		
 
-	private void DestroyDots() { 
-		if (isMatched) {
-			board.allDots [column, row] = null;
-			Destroy (this.gameObject, 0.5f);
-		}
-	}
+	private IEnumerator DestroyDots() {
+		SpriteRenderer mysprite = GetComponent<SpriteRenderer> ();
+		mysprite.color = new Color (1f, 1f, 1f);
 
+		Destroy (this.gameObject, 0.5f);
+		yield return new WaitForSeconds (0.5f);
+
+		board.allDots [column, row] = null;
+	}
 
 }

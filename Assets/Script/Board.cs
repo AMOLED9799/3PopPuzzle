@@ -8,6 +8,7 @@ public class Board : MonoBehaviour {
 	public int height;
 	public GameObject tilePrefab;
 	public BackgroundTile[,] allTiles;
+	public bool needChecking = false;
 
 	public GameObject[] dots;
 	public GameObject [,] allDots;
@@ -18,6 +19,7 @@ public class Board : MonoBehaviour {
 
 		SetUp ();
 
+		// StartCoroutine (MatchCheckerCo ());
 	}
 	
 	private void SetUp() {
@@ -101,6 +103,32 @@ public class Board : MonoBehaviour {
 						}
 					}
 				}
+			}
+		}
+	}
+
+	public void CountNullUnder() {
+		for (int i = 0; i < width; i++) {
+			int nullCount = 0;
+			for (int j = 0; j < height; j++) {
+				if (allDots [i, j] == null) {
+					nullCount++;
+				} else if(nullCount > 0) {
+					allDots [i, j].GetComponent<Dot> ().nullUnderMe = nullCount;
+					allDots [i, j].GetComponent<Dot> ().dropping = true;
+				}
+			}
+		}
+	}
+
+	public void MatchChecker ()
+	{
+		{
+			if (needChecking) {
+				new WaitForSeconds (0.2f);
+
+				CheckMatch ();
+				needChecking = false;
 			}
 		}
 	}
