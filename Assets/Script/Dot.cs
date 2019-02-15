@@ -36,14 +36,14 @@ public class Dot : MonoBehaviour {
 		// swipe position of Dots
 		if (swipeing) {		
 			transform.position = Vector2.SmoothDamp (transform.position, new Vector2 (column, row), ref velocity, 0.3f, 10f, Time.deltaTime);
+			Debug.Log ("Here");
 			if (Mathf.Abs (transform.position.x - column) < 0.05f && Mathf.Abs (transform.position.y - row) < 0.05f) {
 				transform.position = new Vector2 (column, row);
 				swipeing = false;
+				Debug.Log ("Right");
+				board.CheckMatch ();
 			}
 		} 
-
-		StartCoroutine(CheckMatch());
-
 		DestroyDots ();
 		
 		// drop Dot to bottom way
@@ -97,34 +97,7 @@ public class Dot : MonoBehaviour {
 		swipeing = true;
 		otherDot.GetComponent<Dot> ().swipeing = true;
 	}
-
-	IEnumerator CheckMatch() {
-		if (column <= board.width - 3) {
-			if (board.allDots [column, row] != null && board.allDots [column + 1, row] != null && board.allDots [column + 2, row] != null) {
-				if (transform.tag == board.allDots [column + 1, row].tag && transform.tag == board.allDots [column + 2, row].tag) {
-					isMatched = true;
-					board.allDots [column + 1, row].GetComponent<Dot> ().isMatched = true;
-					board.allDots [column + 2, row].GetComponent<Dot> ().isMatched = true;
-					new WaitForSeconds (0.7f);
-
-				}
-			}
-		}
-
-		if (row <= board.height - 3) {
-			if (board.allDots [column, row] != null && board.allDots [column, row + 1] != null && board.allDots [column, row + 2] != null) {
-				if (transform.tag == board.allDots [column, row + 1].tag && transform.tag == board.allDots [column, row + 2].tag) {
-					isMatched = true;
-					board.allDots [column, row + 1].GetComponent<Dot> ().isMatched = true;
-					board.allDots [column, row + 2].GetComponent<Dot> ().isMatched = true;
-					new WaitForSeconds (0.7f);
-
-				}
-			}
-		}
-
-		yield return null;
-	}
+		
 
 	private void DestroyDots() { 
 		if (isMatched) {

@@ -17,6 +17,7 @@ public class Board : MonoBehaviour {
 		allDots = new GameObject[width, height];
 
 		SetUp ();
+
 	}
 	
 	private void SetUp() {
@@ -71,8 +72,36 @@ public class Board : MonoBehaviour {
 				nullCount = 0;
 			}
 		}
-		yield return new WaitForSeconds (0.4f);
+	}
+
+	public void CheckMatch ()
+	{
+		for (int i = 0; i < width - 2; i++) {
+			for (int j = 0; j < height; j++) {
+				if (allDots [i, j] != null) {
+					if (allDots [i + 1, j] != null && allDots [i + 2, j] != null) {
+						if (allDots [i, j].GetComponent<Dot> ().tag == allDots [i + 1, j].GetComponent<Dot> ().tag && allDots [i, j].GetComponent<Dot> ().tag == allDots [i + 2, j].GetComponent<Dot> ().tag) {
+							allDots [i, j].GetComponent<Dot> ().isMatched = true;
+							allDots [i + 1, j].GetComponent<Dot> ().isMatched = true;
+							allDots [i + 2, j].GetComponent<Dot> ().isMatched = true;
+						}
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height-2; j++) {
+				if (allDots [i, j] != null) {
+					if (allDots [i, j + 1] != null && allDots [i, j + 2] != null) {
+						if (allDots [i, j].GetComponent<Dot> ().tag == allDots [i, j + 1].GetComponent<Dot> ().tag && allDots [i, j].GetComponent<Dot> ().tag == allDots [i, j + 2].GetComponent<Dot> ().tag) {
+							allDots [i, j].GetComponent<Dot> ().isMatched = true;
+							allDots [i, j + 1].GetComponent<Dot> ().isMatched = true;
+							allDots [i, j + 2].GetComponent<Dot> ().isMatched = true;
+						}
+					}
+				}
+			}
+		}
 	}
 }
-
-
