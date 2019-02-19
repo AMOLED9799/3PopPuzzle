@@ -62,8 +62,7 @@ public class DotManager : MonoBehaviour {
             SwipeDots();
 
             // 이동한 좌표에 따라 실제 Dot을 움직인다
-            MoveDots(selectedDot, neighborDot);
-
+            // coroutine ChangeDotPositionCo
         }
 
     }
@@ -131,23 +130,7 @@ public class DotManager : MonoBehaviour {
     }
 
     // board 의 allDots[]에 column, row 가 바뀌어 있는 상태에서 좌표를 목적지로 하여 Dot 이미지를 이동시키는 메서드
-    private void MoveDots(GameObject _selectedDot, GameObject _neighborDot)
-    {
 
-
-        Debug.Log("움직이기 시작");
-
-        // Dot 이동
-        {
-            Debug.Log("Loop");
-
-
-            Debug.Log("Break");
-
-            //if (Mathf.Abs(_selectedDot.transform.position.x - _selectedDot.GetComponent<Dot>().column) < 0.07f)
-
-        }
-    }
 
     private IEnumerator ChangeDotPositionCo()
     {
@@ -155,10 +138,11 @@ public class DotManager : MonoBehaviour {
         {
             if (movingState)
             {
-                _selectedDot.transform.position = Vector2.SmoothDamp(_selectedDot.transform.position, new Vector2(_selectedDot.GetComponent<Dot>().column, _selectedDot.GetComponent<Dot>().row), ref selectedVelocity, 1f, 100f, Time.deltaTime);
-                _neighborDot.transform.position = Vector2.SmoothDamp(_neighborDot.transform.position, new Vector2(_neighborDot.GetComponent<Dot>().column, _neighborDot.GetComponent<Dot>().row), ref selectedVelocity, 1f, 100f, Time.deltaTime);
+                // _selectedDot.transform.Translate(new Vector2((_selectedDot.GetComponent<Dot>().column - _selectedDot.transform.position.x) * 0.1f, (_selectedDot.GetComponent<Dot>().row - _selectedDot.transform.position.y) * 0.1f));
+                _selectedDot.transform.position = Vector2.SmoothDamp(_selectedDot.transform.position, new Vector2(_selectedDot.GetComponent<Dot>().column, _selectedDot.GetComponent<Dot>().row), ref selectedVelocity, 0.3f, 100f, Time.deltaTime);
+                _neighborDot.transform.position = Vector2.SmoothDamp(_neighborDot.transform.position, new Vector2(_neighborDot.GetComponent<Dot>().column, _neighborDot.GetComponent<Dot>().row), ref neighborVelocity, 0.3f, 100f, Time.deltaTime);
 
-                if (((Mathf.Abs(_selectedDot.transform.position.x - _selectedDot.GetComponent<Dot>().column) < 0.07f) && (Mathf.Abs(_selectedDot.transform.position.y - _selectedDot.GetComponent<Dot>().row)) < 0.07f))
+                if (((Mathf.Abs(_selectedDot.transform.position.x - _selectedDot.GetComponent<Dot>().column) < 0.05f) && (Mathf.Abs(_selectedDot.transform.position.y - _selectedDot.GetComponent<Dot>().row)) < 0.07f))
                 {
                     _selectedDot.transform.position = new Vector2(_selectedDot.GetComponent<Dot>().column, _selectedDot.GetComponent<Dot>().row);
                     _neighborDot.transform.position = new Vector2(_neighborDot.GetComponent<Dot>().column, _neighborDot.GetComponent<Dot>().row);

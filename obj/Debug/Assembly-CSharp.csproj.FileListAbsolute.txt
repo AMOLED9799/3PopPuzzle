@@ -99,3 +99,5 @@
 /Users/parksungmin/Unity/3PopPuzzle/Temp/bin/Debug/UnityEditor.iOS.Extensions.Xcode.xml
 /Users/parksungmin/Unity/3PopPuzzle/obj/Debug/Assembly-CSharp.csproj.CopyComplete
 /Users/parksungmin/Unity/3PopPuzzle/obj/Debug/Assembly-CSharp.pdb
+/Users/parksungmin/Unity/3PopPuzzle/Temp/bin/Debug/SyntaxTree.VisualStudio.Unity.Bridge.dll
+/Users/parksungmin/Unity/3PopPuzzle/Temp/bin/Debug/SyntaxTree.VisualStudio.Unity.Messaging.dll
