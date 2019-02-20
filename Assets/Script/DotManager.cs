@@ -11,6 +11,7 @@ public class DotManager : MonoBehaviour {
     GameObject _selectedDot = null;
     GameObject _neighborDot = null;
 
+    // SmoothDamp Velocity
     Vector2 selectedVelocity = Vector2.zero;
     Vector2 neighborVelocity = Vector2.zero;
 
@@ -19,11 +20,22 @@ public class DotManager : MonoBehaviour {
     private Vector2 finalTouchPosition = Vector2.zero;
     private float swipeAngle = 0f;
 
+    // 
+
+    public enum State
+    {
+        stable, swipe, swipeDone, match, destroy, drop, refill
+    }
+
+    State state;
     private bool movingState = false;
 
     void Start() {
         board = FindObjectOfType<Board>();
+        state = State.stable;
+        
         StartCoroutine(ChangeDotPositionCo());
+
     }
 
 
@@ -65,14 +77,28 @@ public class DotManager : MonoBehaviour {
             // coroutine ChangeDotPositionCo
         }
 
+        if(state == State.swipeDone)
+        {
+            MatchingDots();
+        }
+
+        if (state == State.match)
+        {
+
+        }
+
+
     }
+
+    // 메서드 정의 부분 -----------------------------------
 
     private void SwipeDots()
     {
+        state = State.swipe;
+
         int row = selectedDot.GetComponent<Dot>().row;
         int column = selectedDot.GetComponent<Dot>().column;
 
-        Debug.Log("스와이프 시작");
         // Swipe With Up
         if (swipeAngle > 60 && swipeAngle < 120)
         {
@@ -124,8 +150,8 @@ public class DotManager : MonoBehaviour {
         _selectedDot = selectedDot;
         _neighborDot = neighborDot;
 
-
         movingState = true;
+        
         return;
     }
 
@@ -146,7 +172,9 @@ public class DotManager : MonoBehaviour {
                 {
                     _selectedDot.transform.position = new Vector2(_selectedDot.GetComponent<Dot>().column, _selectedDot.GetComponent<Dot>().row);
                     _neighborDot.transform.position = new Vector2(_neighborDot.GetComponent<Dot>().column, _neighborDot.GetComponent<Dot>().row);
+
                     movingState = false;
+                    state = State.swipeDone;
 
                     yield return null;
 
@@ -155,5 +183,64 @@ public class DotManager : MonoBehaviour {
 
             yield return null;
         }
+    }
+
+    private void MatchingDots()
+    {
+        state = State.match;
+
+        for (int _row = 0; _row < board.height - 2; _row++)
+        {
+            for (int _column = 0; _column < board.width - 2; _column++)
+            {
+                if ((board.allDots[_column, _row].gameObject.CompareTag(board.allDots[_column + 1, _row].gameObject.tag)) && ((board.allDots[_column, _row].CompareTag(board.allDots[_column + 2, _row].gameObject.tag))))
+                {
+                    board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                    board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
+                    board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
+
+                }
+
+                if ((board.allDots[_column, _row].CompareTag(board.allDots[_column, _row + 1].tag)) && (board.allDots[_column, _row].CompareTag(board.allDots[_column, _row + 2].tag)))
+                {
+                    board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                    board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
+                    board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
+                }
+            }
+        }
+
+        // 예외 지역 처리
+            
+        for (int _row = board.height - 2; _row < board.height; _row++)
+        {
+            for(int _column = 0; _column < board.width - 2; _column++)
+            {
+                if ((board.allDots[_column, _row].tag == board.allDots[_column + 1, _row].tag) && (board.allDots[_column, _row].tag == board.allDots[_column + 2, _row].tag))
+                {
+                    board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                    board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
+                    board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
+                }
+            }
+        }
+
+        for (int _column = board.width - 2; _column < board.width; _column++)
+        {
+            for (int _row = board.height-0; _row < board.height - 2; _row++)
+            {
+                if ((board.allDots[_column, _row].tag == board.allDots[_column, _row + 1].tag) && (board.allDots[_column, _row].tag == board.allDots[_column, _row + 2].tag))
+                {
+                    board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                    board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
+                    board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
+                }
+            }
+        }
+    }
+
+    private void DestoryingDots()
+    {
+
     }
 }
