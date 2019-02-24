@@ -10,6 +10,9 @@ public class Dot : MonoBehaviour {
 
     public int column;
 	public int row;
+    public int nullCount = 0;
+
+    public Vector2 velocity = Vector2.zero;
 
     public bool isMatched = false;
 
@@ -19,7 +22,6 @@ public class Dot : MonoBehaviour {
 
 	//*****************************************
 	void Update () {
-		
         	 
 	}
 	//*****************************************

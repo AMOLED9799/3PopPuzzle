@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class DotManager : MonoBehaviour {
 
+    public static DotManager instance;
+
     private Board board;
+
 
     GameObject selectedDot = null;
     GameObject neighborDot = null;
@@ -14,17 +17,23 @@ public class DotManager : MonoBehaviour {
     // SmoothDamp Velocity
     Vector2 selectedVelocity = Vector2.zero;
     Vector2 neighborVelocity = Vector2.zero;
+    Vector2 dropVelocity = Vector2.zero;
 
     // 각도계산
     private Vector2 firstTouchPosition = Vector2.zero;
     private Vector2 finalTouchPosition = Vector2.zero;
     private float swipeAngle = 0f;
 
+    int howManyDotsNeedDrop = 0;
     // 
+    private void Awake()
+    {
+        instance = this;
+    }
 
     public enum State
     {
-        stable, swipe, swipeDone, match, destroy, drop, refill
+        stable, swipe, swipeDone, match, matchDone, count, countDone, destroy, destoryDone, drop, dropDone, refill, refillDone
     }
 
     State state;
@@ -33,9 +42,10 @@ public class DotManager : MonoBehaviour {
     void Start() {
         board = FindObjectOfType<Board>();
         state = State.stable;
-        
-        StartCoroutine(ChangeDotPositionCo());
 
+        StartCoroutine(ChangeDotPositionCo());
+        StartCoroutine(DestroyingDotsCo());
+        StartCoroutine(DropDotCo());
     }
 
 
@@ -79,7 +89,7 @@ public class DotManager : MonoBehaviour {
 
         if(state == State.swipeDone)
         {
-            MatchingDots();
+            MatchingDot();
         }
 
         if (state == State.match)
@@ -98,6 +108,7 @@ public class DotManager : MonoBehaviour {
 
         int row = selectedDot.GetComponent<Dot>().row;
         int column = selectedDot.GetComponent<Dot>().column;
+        GameObject tempObject;
 
         // Swipe With Up
         if (swipeAngle > 60 && swipeAngle < 120)
@@ -108,6 +119,11 @@ public class DotManager : MonoBehaviour {
             // [column, row] 이동
             neighborDot.GetComponent<Dot>().row--;
             selectedDot.GetComponent<Dot>().row++;
+
+            tempObject = board.allDots[column, row];
+
+            board.allDots[column, row] = neighborDot;
+            board.allDots[column, row + 1] = tempObject;
         }
         // Swipe with Down
         else if (swipeAngle < -60 && swipeAngle > -120)
@@ -118,6 +134,11 @@ public class DotManager : MonoBehaviour {
             // [column, row] 이동
             neighborDot.GetComponent<Dot>().row++;
             selectedDot.GetComponent<Dot>().row--;
+
+            tempObject = board.allDots[column, row];
+
+            board.allDots[column, row] = neighborDot;
+            board.allDots[column, row - 1] = tempObject;
         }
         // Swipe with Right
         else if (swipeAngle > -30 && swipeAngle < 30)
@@ -128,6 +149,11 @@ public class DotManager : MonoBehaviour {
             // [column, row] 이동
             neighborDot.GetComponent<Dot>().column--;
             selectedDot.GetComponent<Dot>().column++;
+
+            tempObject = board.allDots[column, row];
+
+            board.allDots[column, row] = neighborDot;
+            board.allDots[column + 1, row] = tempObject;
         }
         // Swipe with Left
         else if (swipeAngle > 150 || swipeAngle < -150)
@@ -138,7 +164,13 @@ public class DotManager : MonoBehaviour {
             // [column, row] 이동
             neighborDot.GetComponent<Dot>().column++;
             selectedDot.GetComponent<Dot>().column--;
+
+            tempObject = board.allDots[column, row];
+
+            board.allDots[column, row] = neighborDot;
+            board.allDots[column - 1, row] = tempObject;
         }
+
         // else : swipe각도가 대각선으로 치우친 경우 -> 초기화
         else
         {
@@ -177,7 +209,6 @@ public class DotManager : MonoBehaviour {
                     state = State.swipeDone;
 
                     yield return null;
-
                 }
             }
 
@@ -185,7 +216,7 @@ public class DotManager : MonoBehaviour {
         }
     }
 
-    private void MatchingDots()
+    private void MatchingDot()
     {
         state = State.match;
 
@@ -193,54 +224,178 @@ public class DotManager : MonoBehaviour {
         {
             for (int _column = 0; _column < board.width - 2; _column++)
             {
-                if ((board.allDots[_column, _row].gameObject.CompareTag(board.allDots[_column + 1, _row].gameObject.tag)) && ((board.allDots[_column, _row].CompareTag(board.allDots[_column + 2, _row].gameObject.tag))))
+                if (board.allDots[_column, _row] != null)
                 {
-                    board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
-                    board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
-                    board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
-
+                    if (board.allDots[_column + 1, _row] != null && board.allDots[_column + 2, _row] != null)
+                    {
+                        if ((board.allDots[_column, _row].gameObject.CompareTag(board.allDots[_column + 1, _row].gameObject.tag)) && ((board.allDots[_column, _row].CompareTag(board.allDots[_column + 2, _row].gameObject.tag))))
+                        {
+                            board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                            board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
+                            board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
+                        }
+                    }
+                    if (board.allDots[_column, _row + 1] != null && board.allDots[_column, _row + 2] != null) {
+                    if ((board.allDots[_column, _row].CompareTag(board.allDots[_column, _row + 1].tag)) && (board.allDots[_column, _row].CompareTag(board.allDots[_column, _row + 2].tag)))
+                    {
+                        board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                        board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
+                        board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
+                    }
                 }
-
-                if ((board.allDots[_column, _row].CompareTag(board.allDots[_column, _row + 1].tag)) && (board.allDots[_column, _row].CompareTag(board.allDots[_column, _row + 2].tag)))
-                {
-                    board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
-                    board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
-                    board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
-                }
+            }
             }
         }
 
-        // 예외 지역 처리
-            
+            // 예외 지역 처리
+
         for (int _row = board.height - 2; _row < board.height; _row++)
         {
-            for(int _column = 0; _column < board.width - 2; _column++)
+            for (int _column = 0; _column < board.width - 2; _column++)
             {
-                if ((board.allDots[_column, _row].tag == board.allDots[_column + 1, _row].tag) && (board.allDots[_column, _row].tag == board.allDots[_column + 2, _row].tag))
+                if (board.allDots[_column, _row] != null)
                 {
-                    board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
-                    board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
-                    board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
+                    if (board.allDots[_column + 1, _row] != null && board.allDots[_column + 2, _row] != null)
+                    {
+
+                        if ((board.allDots[_column, _row].tag == board.allDots[_column + 1, _row].tag) && (board.allDots[_column, _row].tag == board.allDots[_column + 2, _row].tag))
+                        {
+                            board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                            board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
+                            board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
+                        }
+                    }
                 }
             }
         }
 
         for (int _column = board.width - 2; _column < board.width; _column++)
         {
-            for (int _row = board.height-0; _row < board.height - 2; _row++)
+            for (int _row = 0; _row < board.height - 2; _row++)
             {
-                if ((board.allDots[_column, _row].tag == board.allDots[_column, _row + 1].tag) && (board.allDots[_column, _row].tag == board.allDots[_column, _row + 2].tag))
+                if (board.allDots[_column, _row] != null)
                 {
-                    board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
-                    board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
-                    board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
+                    if (board.allDots[_column, _row + 1] != null && board.allDots[_column, _row + 2] != null)
+                    {
+
+                        if ((board.allDots[_column, _row].tag == board.allDots[_column, _row + 1].tag) && (board.allDots[_column, _row].tag == board.allDots[_column, _row + 2].tag))
+                        {
+                            board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                            board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
+                            board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
+                        }
+                    }
+                }
+            }
+        }
+        state = State.matchDone;
+        return;
+     }
+
+    private IEnumerator DestroyingDotsCo()
+    {
+        while(true)
+        {
+            if(state == State.matchDone)
+            {
+                state = State.destroy;
+                foreach(GameObject dot in board.allDots)
+                {
+                    if(dot != null && dot.GetComponent<Dot>().isMatched)
+                    {
+                        SpriteRenderer spriteRenderer = dot.GetComponent<SpriteRenderer>();
+                        spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f);
+
+                        Destroy(dot, 0.4f);
+                        board.allDots[dot.GetComponent<Dot>().column, dot.GetComponent<Dot>().row] = null;
+                    }
+                }
+                state = State.destoryDone;
+            }
+            yield return null;
+        }
+    }
+
+    private void CountNulls()
+    {
+        for (int _column = 0; _column < board.width; _column++)
+        {
+            int nullCount = 0;
+
+            for (int _row = 0; _row < board.height; _row++)
+            {
+                if (board.allDots[_column, _row] == null)
+                {
+                    nullCount++;
+                }
+                else
+                {
+                    board.allDots[_column, _row].GetComponent<Dot>().nullCount = nullCount;
+                    howManyDotsNeedDrop++;
                 }
             }
         }
     }
 
-    private void DestoryingDots()
+    private IEnumerator DropDotCo()
     {
+        while(true)
+        {
+            if (state == State.destoryDone)
+            {
+                Debug.Log("Hi");
+
+                state = State.count;
+
+                CountNulls();
+
+                state = State.countDone;
+            }
+
+            if (state == State.countDone || state == State.drop)
+            {
+                Debug.Log("Hello");
+
+                state = State.drop;
+
+                for(int _column = 0; _column < board.width; _column++)
+                {
+                    for(int _row = 0; _row < board.height; _row++)
+                    {
+                        if(board.allDots[_column, _row].GetComponent<Dot>().nullCount != 0)
+                        {
+                            board.allDots[_column, _row].transform.position = Vector2.SmoothDamp(board.allDots[_column, _row].transform.position,
+                                                                                                new Vector2(board.allDots[_column, _row].transform.position.x, board.allDots[_column, _row].transform.position.y - board.allDots[_column, _row].GetComponent<Dot>().nullCount),
+                                                                                                ref board.allDots[_column, _row].GetComponent<Dot>().velocity, 0.6f, 
+                                                                                                10f, 
+                                                                                                Time.deltaTime);
+
+                            if((board.allDots[_column, _row].transform.position.y  - board.allDots[_column, _row].GetComponent<Dot>().row + board.allDots[_column, _row].GetComponent<Dot>().nullCount) < 0.05f)
+                            {
+                                board.allDots[_column, _row].transform.position = new Vector2(board.allDots[_column, _row].GetComponent<Dot>().column, board.allDots[_column, _row].GetComponent<Dot>().row - board.allDots[_column, _row].GetComponent<Dot>().nullCount);
+                                board.allDots[_column, _row].GetComponent<Dot>().row = board.allDots[_column, _row].GetComponent<Dot>().row - board.allDots[_column, _row].GetComponent<Dot>().nullCount;
+
+                                board.allDots[_column, _row].GetComponent<Dot>().nullCount = 0;
+
+                                board.allDots[_column, _row - board.allDots[_column, _row].GetComponent<Dot>().nullCount] = board.allDots[_column, _row];
+                                board.allDots[_column, _row] = null;
+
+                                howManyDotsNeedDrop--;
+                            }
+                        }
+                    }
+                }
+
+                if(howManyDotsNeedDrop == 0)
+                {
+                    Debug.Log("Here");
+
+                    state = State.dropDone;
+                    yield return null;
+                }
+            }
+        }
+
 
     }
 }
