@@ -285,4 +285,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   howManyDotsNeedDrop: 0
   howManyDotsMatched: 0
-  state: 0
+  state: 3
