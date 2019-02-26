@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Board : MonoBehaviour {
 
+    public static Board board;
+
 	public int width;
 	public int height;
 	public GameObject tilePrefab;
@@ -13,7 +15,12 @@ public class Board : MonoBehaviour {
 	public GameObject[] dots;
 	public GameObject [,] allDots;
 
-	void Start () {
+    private void Awake()
+    {
+        board = this;
+    }
+
+    void Start () {
 		allTiles = new BackgroundTile[width, height];
 		allDots = new GameObject[width, height];
 

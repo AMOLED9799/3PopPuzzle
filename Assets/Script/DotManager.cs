@@ -6,8 +6,6 @@ public class DotManager : MonoBehaviour {
 
     public static DotManager instance;
 
-    private Board board;
-
 
     GameObject selectedDot = null;
     GameObject neighborDot = null;
@@ -27,6 +25,8 @@ public class DotManager : MonoBehaviour {
     public int howManyDotsNeedDrop = 0;
     public int howManyDotsMatched = 0;
 
+    private bool matchExist = false;
+
     // 
     private void Awake()
     {
@@ -41,7 +41,6 @@ public class DotManager : MonoBehaviour {
     public State state;
 
     void Start() {
-        board = FindObjectOfType<Board>();
         state = State.stable;
 
     }
@@ -95,9 +94,9 @@ public class DotManager : MonoBehaviour {
 
                     // Dot을 실제로 움직이기
                     // selected Dot은 Mouse Down Input이 들어오면서 결정된다.
-                    selectedDot.GetComponent<Dot>().swipeMove = true;
+                    selectedDot.GetComponent<Dot>().swipeDotTF = true;
                     // neighbor Dot은 Mouse Up Input을 통한 각도처리와 함께 결정된다.
-                    neighborDot.GetComponent<Dot>().swipeMove = true;
+                    neighborDot.GetComponent<Dot>().swipeDotTF = true;
 
                     state = State.checkMatch;
                 }
@@ -107,18 +106,53 @@ public class DotManager : MonoBehaviour {
                 {
                     // 모든 매치검사를 실행
                     MatchingDot();
+
+                    Debug.Log(matchExist.ToString());
+
+                    if (matchExist)
+                        state = State.destroyMatch;
+                    else
+                        state = State.stable;
                 }
                 break;
 
             case State.destroyMatch:
                 {
+                    // 모든 dot에 대해 isMatched 를 확인해 destroy 코루틴을 실행시킨다
+                    foreach (GameObject dot in Board.board.allDots)
+                    {
+                        if (dot != null)
+                        {
+                            if (dot.GetComponent<Dot>().isMatched)
+                            {
+                                dot.GetComponent<Dot>().destroyDotTF = true;
+                            }
+                        }
+                    }
 
+                    state = State.dropDot;
                 }
                 break;
 
             case State.dropDot:
                 {
+                    // 자기 아래에 null 개수를 확인
+                    CountNulls();
 
+                    // 모든 dot에 대해 drop 코루틴을 실행시킨다.
+                    foreach(GameObject dot in Board.board.allDots)
+                    {
+                        if (dot != null)
+                        {
+                            if (dot.GetComponent<Dot>().nullCount != 0)
+                            {
+                                dot.GetComponent<Dot>().firstSet = true;
+                                dot.GetComponent<Dot>().dropDotTF = true;
+                            }
+                        }
+                    }
+
+                    state = State.checkMatch;
                 }
                 break;
 
@@ -138,61 +172,61 @@ public class DotManager : MonoBehaviour {
         if (swipeAngle > 60 && swipeAngle < 120)
         {
             // neighborDot 지정
-            neighborDot = board.allDots[column, row + 1];
+            neighborDot = Board.board.allDots[column, row + 1];
 
             // [column, row] 이동
             neighborDot.GetComponent<Dot>().row--;
             selectedDot.GetComponent<Dot>().row++;
 
-            tempObject = board.allDots[column, row];
+            tempObject = Board.board.allDots[column, row];
 
-            board.allDots[column, row] = neighborDot;
-            board.allDots[column, row + 1] = tempObject;
+            Board.board.allDots[column, row] = neighborDot;
+            Board.board.allDots[column, row + 1] = tempObject;
         }
         // Swipe with Down
         else if (swipeAngle < -60 && swipeAngle > -120)
         {
             // neighborDot 지정
-            neighborDot = board.allDots[column, row - 1];
+            neighborDot = Board.board.allDots[column, row - 1];
 
             // [column, row] 이동
             neighborDot.GetComponent<Dot>().row++;
             selectedDot.GetComponent<Dot>().row--;
 
-            tempObject = board.allDots[column, row];
+            tempObject = Board.board.allDots[column, row];
 
-            board.allDots[column, row] = neighborDot;
-            board.allDots[column, row - 1] = tempObject;
+            Board.board.allDots[column, row] = neighborDot;
+            Board.board.allDots[column, row - 1] = tempObject;
         }
         // Swipe with Right
         else if (swipeAngle > -30 && swipeAngle < 30)
         {
             // neighborDot 지정
-            neighborDot = board.allDots[column + 1, row];
+            neighborDot = Board.board.allDots[column + 1, row];
 
             // [column, row] 이동
             neighborDot.GetComponent<Dot>().column--;
             selectedDot.GetComponent<Dot>().column++;
 
-            tempObject = board.allDots[column, row];
+            tempObject = Board.board.allDots[column, row];
 
-            board.allDots[column, row] = neighborDot;
-            board.allDots[column + 1, row] = tempObject;
+            Board.board.allDots[column, row] = neighborDot;
+            Board.board.allDots[column + 1, row] = tempObject;
         }
         // Swipe with Left
         else if (swipeAngle > 150 || swipeAngle < -150)
         {
             // neighborDot 지정
-            neighborDot = board.allDots[column - 1, row];
+            neighborDot = Board.board.allDots[column - 1, row];
 
             // [column, row] 이동
             neighborDot.GetComponent<Dot>().column++;
             selectedDot.GetComponent<Dot>().column--;
 
-            tempObject = board.allDots[column, row];
+            tempObject = Board.board.allDots[column, row];
 
-            board.allDots[column, row] = neighborDot;
-            board.allDots[column - 1, row] = tempObject;
+            Board.board.allDots[column, row] = neighborDot;
+            Board.board.allDots[column - 1, row] = tempObject;
         }
 
         // else : swipe각도가 대각선으로 치우친 경우 -> 초기화
@@ -210,39 +244,37 @@ public class DotManager : MonoBehaviour {
     }
 
 
-    // board 의 allDots[]에 column, row 가 바뀌어 있는 상태에서 좌표를 목적지로 하여 Dot 이미지를 이동시키는 메서드
+    // Board.board 의 allDots[]에 column, row 가 바뀌어 있는 상태에서 좌표를 목적지로 하여 Dot 이미지를 이동시키는 메서드
 
 
 
     private void MatchingDot()
     {
-        Debug.Log("HAppy");
-        for (int _row = 0; _row < board.height - 2; _row++)
+        Debug.Log("Match Execute");
+        for (int _row = 0; _row < Board.board.height - 2; _row++)
         {
-            Debug.Log("YWW");
-
-            for (int _column = 0; _column < board.width - 2; _column++)
+            for (int _column = 0; _column < Board.board.width - 2; _column++)
             {
-                if (board.allDots[_column, _row] != null)
+                if (Board.board.allDots[_column, _row] != null)
                 {
-                    if (board.allDots[_column + 1, _row] != null && board.allDots[_column + 2, _row] != null)
+                    if (Board.board.allDots[_column + 1, _row] != null && Board.board.allDots[_column + 2, _row] != null)
                     {
-                        if ((board.allDots[_column, _row].gameObject.CompareTag(board.allDots[_column + 1, _row].gameObject.tag)) && ((board.allDots[_column, _row].CompareTag(board.allDots[_column + 2, _row].gameObject.tag))))
+                        if ((Board.board.allDots[_column, _row].gameObject.CompareTag(Board.board.allDots[_column + 1, _row].gameObject.tag)) && ((Board.board.allDots[_column, _row].CompareTag(Board.board.allDots[_column + 2, _row].gameObject.tag))))
                         {
-                            board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
-                            board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
-                            board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
                             howManyDotsMatched++;
 
                         }
                     }
 
-                    if (board.allDots[_column, _row + 1] != null && board.allDots[_column, _row + 2] != null) {
-                        if ((board.allDots[_column, _row].CompareTag(board.allDots[_column, _row + 1].tag)) && (board.allDots[_column, _row].CompareTag(board.allDots[_column, _row + 2].tag)))
+                    if (Board.board.allDots[_column, _row + 1] != null && Board.board.allDots[_column, _row + 2] != null) {
+                        if ((Board.board.allDots[_column, _row].CompareTag(Board.board.allDots[_column, _row + 1].tag)) && (Board.board.allDots[_column, _row].CompareTag(Board.board.allDots[_column, _row + 2].tag)))
                         {
-                            board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
-                            board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
-                            board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
                             howManyDotsMatched++;
 
                         }
@@ -253,20 +285,20 @@ public class DotManager : MonoBehaviour {
 
         // 예외 지역 처리
 
-        for (int _row = board.height - 2; _row < board.height; _row++)
+        for (int _row = Board.board.height - 2; _row < Board.board.height; _row++)
         {
-            for (int _column = 0; _column < board.width - 2; _column++)
+            for (int _column = 0; _column < Board.board.width - 2; _column++)
             {
-                if (board.allDots[_column, _row] != null)
+                if (Board.board.allDots[_column, _row] != null)
                 {
-                    if (board.allDots[_column + 1, _row] != null && board.allDots[_column + 2, _row] != null)
+                    if (Board.board.allDots[_column + 1, _row] != null && Board.board.allDots[_column + 2, _row] != null)
                     {
 
-                        if ((board.allDots[_column, _row].tag == board.allDots[_column + 1, _row].tag) && (board.allDots[_column, _row].tag == board.allDots[_column + 2, _row].tag))
+                        if ((Board.board.allDots[_column, _row].tag == Board.board.allDots[_column + 1, _row].tag) && (Board.board.allDots[_column, _row].tag == Board.board.allDots[_column + 2, _row].tag))
                         {
-                            board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
-                            board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
-                            board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
                             howManyDotsMatched++;
 
                         }
@@ -275,93 +307,71 @@ public class DotManager : MonoBehaviour {
             }
         }
 
-        for (int _column = board.width - 2; _column < board.width; _column++)
+        for (int _column = Board.board.width - 2; _column < Board.board.width; _column++)
         {
-            for (int _row = 0; _row < board.height - 2; _row++)
+            for (int _row = 0; _row < Board.board.height - 2; _row++)
             {
-                if (board.allDots[_column, _row] != null)
+                if (Board.board.allDots[_column, _row] != null)
                 {
-                    if (board.allDots[_column, _row + 1] != null && board.allDots[_column, _row + 2] != null)
+                    if (Board.board.allDots[_column, _row + 1] != null && Board.board.allDots[_column, _row + 2] != null)
                     {
 
-                        if ((board.allDots[_column, _row].tag == board.allDots[_column, _row + 1].tag) && (board.allDots[_column, _row].tag == board.allDots[_column, _row + 2].tag))
+                        if ((Board.board.allDots[_column, _row].tag == Board.board.allDots[_column, _row + 1].tag) && (Board.board.allDots[_column, _row].tag == Board.board.allDots[_column, _row + 2].tag))
                         {
-                            board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
-                            board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
-                            board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
+                            Board.board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
 
                             howManyDotsMatched++;
                         }
                     }
                 }
             }
+        }
+
+        Debug.Log(howManyDotsMatched);
+        if(howManyDotsMatched == 0)
+        {
+            matchExist = false;
+
+            howManyDotsMatched = 0;
+        }
+        else
+        {
+            matchExist = true;
+
+            howManyDotsMatched = 0;
         }
 
         return;
     }
 
-}
-    /*
-    private IEnumerator DestroyingDotsCo()
-    {
-        while(true)
-        {
-            if(state == State.matchDone)
-            {
-                Debug.Log(state.ToString());
-
-                state = State.destroy;
-
-                foreach(GameObject dot in board.allDots)
-                {
-                    if(dot != null && dot.GetComponent<Dot>().isMatched)
-                    {
-                        SpriteRenderer spriteRenderer = dot.GetComponent<SpriteRenderer>();
-                        spriteRenderer.color = new Color(0.5f, 0.5f, 0.5f);
-
-                        Destroy(dot, 0.2f);
-
-                        board.allDots[dot.GetComponent<Dot>().column, dot.GetComponent<Dot>().row] = null;
-                    }
-                }
-
-                state = State.destoryDone;
-            }
-
-            yield return null;
-        }
-    }
 
     private void CountNulls()
     {
-        for (int _column = 0; _column < board.width; _column++)
+        for (int _column = 0; _column < Board.board.width; _column++)
         {
             int nullCount = 0;
 
-            for (int _row = 0; _row < board.height; _row++)
+            for (int _row = 0; _row < Board.board.height; _row++)
             {
-                if (board.allDots[_column, _row] == null)
+                if (Board.board.allDots[_column, _row] == null)
                 {
                     nullCount++;
                 }
-                else if(nullCount != 0)
+                else if (nullCount != 0)
                 {
-                    board.allDots[_column, _row].GetComponent<Dot>().nullCount = nullCount;
+                    Board.board.allDots[_column, _row].GetComponent<Dot>().nullCount = nullCount;
                     howManyDotsNeedDrop++;
                 }
             }
         }
 
-        if(howManyDotsNeedDrop == 0)
-        {
-            state = State.dropDone;
-        } else
-        {
-            state = State.countDone;
 
-        }
     }
+}
 
+/*
     private IEnumerator DropDotCo()
     {
         while(true)
@@ -388,32 +398,32 @@ public class DotManager : MonoBehaviour {
 
                 state = State.drop;
 
-                for (int _column = 0; _column < board.width; _column++)
+                for (int _column = 0; _column < Board.board.width; _column++)
                 {
                     Debug.Log("Yaho");
 
-                    for (int _row = 0; _row < board.height; _row++)
+                    for (int _row = 0; _row < Board.board.height; _row++)
                     {
-                        if (board.allDots[_column, _row] != null)
+                        if (Board.board.allDots[_column, _row] != null)
                         {
-                            if (board.allDots[_column, _row].GetComponent<Dot>().nullCount != 0)
+                            if (Board.board.allDots[_column, _row].GetComponent<Dot>().nullCount != 0)
                             {
-                                board.allDots[_column, _row].transform.Translate(new Vector2(0f, -0.2f));
+                                Board.board.allDots[_column, _row].transform.Translate(new Vector2(0f, -0.2f));
 
-                                if ((board.allDots[_column, _row].transform.position.y - (board.allDots[_column, _row].GetComponent<Dot>().row) + board.allDots[_column, _row].GetComponent<Dot>().nullCount) < 0.05f)
+                                if ((Board.board.allDots[_column, _row].transform.position.y - (Board.board.allDots[_column, _row].GetComponent<Dot>().row) + Board.board.allDots[_column, _row].GetComponent<Dot>().nullCount) < 0.05f)
                                 {
                                     Debug.Log("hi im elfo");
 
-                                    board.allDots[_column, _row].transform.position = new Vector2(board.allDots[_column, _row].GetComponent<Dot>().column, board.allDots[_column, _row].GetComponent<Dot>().row - board.allDots[_column, _row].GetComponent<Dot>().nullCount);
-                                    board.allDots[_column, _row].GetComponent<Dot>().row = board.allDots[_column, _row].GetComponent<Dot>().row - board.allDots[_column, _row].GetComponent<Dot>().nullCount;
+                                    Board.board.allDots[_column, _row].transform.position = new Vector2(Board.board.allDots[_column, _row].GetComponent<Dot>().column, Board.board.allDots[_column, _row].GetComponent<Dot>().row - Board.board.allDots[_column, _row].GetComponent<Dot>().nullCount);
+                                    Board.board.allDots[_column, _row].GetComponent<Dot>().row = Board.board.allDots[_column, _row].GetComponent<Dot>().row - Board.board.allDots[_column, _row].GetComponent<Dot>().nullCount;
 
                                     //초기화
-                                    int tempNullCount = board.allDots[_column, _row].GetComponent<Dot>().nullCount;
+                                    int tempNullCount = Board.board.allDots[_column, _row].GetComponent<Dot>().nullCount;
 
-                                    board.allDots[_column, _row - tempNullCount] = board.allDots[_column, _row];
+                                    Board.board.allDots[_column, _row - tempNullCount] = Board.board.allDots[_column, _row];
 
-                                    board.allDots[_column, _row].GetComponent<Dot>().nullCount = 0;
-                                    board.allDots[_column, _row] = null;
+                                    Board.board.allDots[_column, _row].GetComponent<Dot>().nullCount = 0;
+                                    Board.board.allDots[_column, _row] = null;
 
                                     howManyDotsNeedDrop--;
 
