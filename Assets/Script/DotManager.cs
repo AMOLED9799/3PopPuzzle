@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DotManager : MonoBehaviour {
 
-    public static DotManager instance;
+    public static DotManager dotManager;
 
 
     GameObject selectedDot = null;
@@ -24,13 +24,14 @@ public class DotManager : MonoBehaviour {
 
     public int howManyDotsNeedDrop = 0;
     public int howManyDotsMatched = 0;
+    public int howManyDotsDestroy = 0;
 
     private bool matchExist = false;
 
     // 
     private void Awake()
     {
-        instance = this;
+        dotManager = this;
     }
 
     public enum State
@@ -42,125 +43,154 @@ public class DotManager : MonoBehaviour {
 
     void Start() {
         state = State.stable;
+        StartCoroutine(SwitchStateCo());
 
     }
 
 
     void Update() {
-        switch (state)
-        {
-            case State.stable:
-                // 안정된 상태. 
-                // 마우스 swipe를 감지하면 바로 checking state로 이동한다.
-                {
-                    // raycast로 마우스가 있는 위치의 object를 가져온다
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                        Ray2D ray = new Ray2D(firstTouchPosition, Vector2.zero);
-                        RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
-
-                        // Dot을 클릭
-                        if (hit.collider != null)
-                        {
-                            selectedDot = hit.collider.gameObject;
-                        }
-
-                        // Dot을 클릭 X
-                        else
-                        {
-                            selectedDot = null;
-                            firstTouchPosition = Vector2.zero;
-                        }
-                    }
-
-                    // 마우스 클릭을 떼면, 각도를 계산하여 움직이기를 실행한다
-                    if (Input.GetMouseButtonUp(0) && (selectedDot != null))
-                    {
-                        finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-                        // 각도 : 2-1-4-3분면 순서로 180 ~ -180
-                        swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y, finalTouchPosition.x - firstTouchPosition.x) / Mathf.PI * 180;
-
-                        state = State.swipeDot;
-                    }
-                }
-                break;
-
-            case State.swipeDot:
-                {
-                    // Dot의 column, row를 이동시킨다 (화면상이 아닌 데이터상에서 움직임)
-                    SwipeDotsCR();
-
-                    // Dot을 실제로 움직이기
-                    // selected Dot은 Mouse Down Input이 들어오면서 결정된다.
-                    selectedDot.GetComponent<Dot>().swipeDotTF = true;
-                    // neighbor Dot은 Mouse Up Input을 통한 각도처리와 함께 결정된다.
-                    neighborDot.GetComponent<Dot>().swipeDotTF = true;
-
-                    state = State.checkMatch;
-                }
-                break;
-
-            case State.checkMatch:
-                {
-                    // 모든 매치검사를 실행
-                    MatchingDot();
-
-                    Debug.Log(matchExist.ToString());
-
-                    if (matchExist)
-                        state = State.destroyMatch;
-                    else
-                        state = State.stable;
-                }
-                break;
-
-            case State.destroyMatch:
-                {
-                    // 모든 dot에 대해 isMatched 를 확인해 destroy 코루틴을 실행시킨다
-                    foreach (GameObject dot in Board.board.allDots)
-                    {
-                        if (dot != null)
-                        {
-                            if (dot.GetComponent<Dot>().isMatched)
-                            {
-                                dot.GetComponent<Dot>().destroyDotTF = true;
-                            }
-                        }
-                    }
-
-                    state = State.dropDot;
-                }
-                break;
-
-            case State.dropDot:
-                {
-                    // 자기 아래에 null 개수를 확인
-                    CountNulls();
-
-                    // 모든 dot에 대해 drop 코루틴을 실행시킨다.
-                    foreach(GameObject dot in Board.board.allDots)
-                    {
-                        if (dot != null)
-                        {
-                            if (dot.GetComponent<Dot>().nullCount != 0)
-                            {
-                                dot.GetComponent<Dot>().firstSet = true;
-                                dot.GetComponent<Dot>().dropDotTF = true;
-                            }
-                        }
-                    }
-
-                    state = State.checkMatch;
-                }
-                break;
-
-        }
 
     }
 
     // 메서드 정의 부분 -----------------------------------
+
+    private IEnumerator SwitchStateCo()
+    {
+        Debug.Log("START SWITCHSTATECOROUTINE");
+
+        while (true)
+        {
+            switch (state)
+            {
+                case State.stable:
+                    {
+                        Debug.Log("Stable State");
+                        // 안정된 상태. 
+                        // 마우스 swipe를 감지하면 바로 checking state로 이동한다.
+
+                        // raycast로 마우스가 있는 위치의 object를 가져온다
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            Debug.Log("High");
+
+                            firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                            Ray2D ray = new Ray2D(firstTouchPosition, Vector2.zero);
+                            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
+
+                            Debug.Log(hit.collider.gameObject.name);
+
+                            // Dot을 클릭
+                            if (hit.collider != null)
+                            {
+                                selectedDot = hit.collider.gameObject;
+                            }
+
+                            // Dot을 클릭 X
+                            else
+                            {
+                                selectedDot = null;
+                                firstTouchPosition = Vector2.zero;
+
+                            }
+                        }
+
+                        // 마우스 클릭을 떼면, 각도를 계산하여 움직이기를 실행한다
+                        if (Input.GetMouseButtonUp(0) && (selectedDot != null))
+                        {
+                            finalTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+                            // 각도 : 2-1-4-3분면 순서로 180 ~ -180
+                            swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y, finalTouchPosition.x - firstTouchPosition.x) / Mathf.PI * 180;
+
+                            state = State.swipeDot;
+                        }
+
+                        break;
+                    }
+
+                case State.swipeDot:
+                    {
+                        // Dot의 column, row를 이동시킨다 (화면상이 아닌 데이터상에서 움직임)
+                        SwipeDotsCR();
+
+                        // Dot을 실제로 움직이기
+                        // selected Dot은 Mouse Down Input이 들어오면서 결정된다.
+                        selectedDot.GetComponent<Dot>().swipeDotTF = true;
+                        // neighbor Dot은 Mouse Up Input을 통한 각도처리와 함께 결정된다.
+                        neighborDot.GetComponent<Dot>().swipeDotTF = true;
+
+                        if (selectedDot.GetComponent<Dot>().swipeDotTF == false && !neighborDot.GetComponent<Dot>().swipeDotTF == false)
+                        {
+                            state = State.checkMatch;
+                        }
+                    }
+                    break;
+
+                case State.checkMatch:
+                    {
+                        // 모든 매치검사를 실행
+                        MatchingDot();
+
+                        Debug.Log(matchExist.ToString());
+
+                        if (matchExist)
+                        {
+                            state = State.destroyMatch;
+
+                        }
+                        else
+                        {
+                            state = State.stable;
+                        }
+                    }
+                    break;
+
+                case State.destroyMatch:
+                    {
+                        // 모든 dot에 대해 isMatched 를 확인해 destroy 코루틴을 실행시킨다
+                        foreach (GameObject dot in Board.board.allDots)
+                        {
+                            if (dot != null)
+                            {
+                                if (dot.GetComponent<Dot>().isMatched)
+                                {
+                                    dot.GetComponent<Dot>().destroyDotTF = true;
+                                }
+                            }
+                        }
+                        state = State.dropDot;
+
+                    }
+                    break;
+
+                case State.dropDot:
+                    {
+                        // 자기 아래에 null 개수를 확인
+                        CountNulls();
+
+                        // 모든 dot에 대해 drop 코루틴을 실행시킨다.
+                        foreach (GameObject dot in Board.board.allDots)
+                        {
+                            if (dot != null)
+                            {
+                                if (dot.GetComponent<Dot>().nullCount != 0)
+                                {
+                                    dot.GetComponent<Dot>().firstSet = true;
+                                    dot.GetComponent<Dot>().dropDotTF = true;
+                                }
+                            }
+                        }
+
+                        if (howManyDotsNeedDrop == 0)
+                        {
+                            state = State.checkMatch;
+                        }
+                    }
+                    break;
+            }
+            yield return new WaitForEndOfFrame();
+        }
+    }
 
     private void SwipeDotsCR()
     {
@@ -251,6 +281,8 @@ public class DotManager : MonoBehaviour {
     private void MatchingDot()
     {
         Debug.Log("Match Execute");
+        howManyDotsMatched = 0;
+    
         for (int _row = 0; _row < Board.board.height - 2; _row++)
         {
             for (int _column = 0; _column < Board.board.width - 2; _column++)
@@ -264,6 +296,7 @@ public class DotManager : MonoBehaviour {
                             Board.board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
                             Board.board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
                             Board.board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
+
                             howManyDotsMatched++;
 
                         }
@@ -275,6 +308,7 @@ public class DotManager : MonoBehaviour {
                             Board.board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
                             Board.board.allDots[_column, _row + 1].GetComponent<Dot>().isMatched = true;
                             Board.board.allDots[_column, _row + 2].GetComponent<Dot>().isMatched = true;
+
                             howManyDotsMatched++;
 
                         }
@@ -299,6 +333,7 @@ public class DotManager : MonoBehaviour {
                             Board.board.allDots[_column, _row].GetComponent<Dot>().isMatched = true;
                             Board.board.allDots[_column + 1, _row].GetComponent<Dot>().isMatched = true;
                             Board.board.allDots[_column + 2, _row].GetComponent<Dot>().isMatched = true;
+
                             howManyDotsMatched++;
 
                         }
@@ -333,14 +368,11 @@ public class DotManager : MonoBehaviour {
         if(howManyDotsMatched == 0)
         {
             matchExist = false;
-
-            howManyDotsMatched = 0;
-        }
+                  }
         else
         {
             matchExist = true;
 
-            howManyDotsMatched = 0;
         }
 
         return;
@@ -349,6 +381,8 @@ public class DotManager : MonoBehaviour {
 
     private void CountNulls()
     {
+        howManyDotsNeedDrop = 0;
+
         for (int _column = 0; _column < Board.board.width; _column++)
         {
             int nullCount = 0;
@@ -369,6 +403,8 @@ public class DotManager : MonoBehaviour {
 
 
     }
+
+
 }
 
 /*

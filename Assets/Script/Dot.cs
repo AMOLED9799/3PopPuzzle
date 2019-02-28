@@ -7,7 +7,7 @@ public class Dot : MonoBehaviour {
 
 
     public int column;
-	public int row;
+    public int row;
     public int nullCount = 0;
 
     public bool swipeDotTF = false;
@@ -22,16 +22,16 @@ public class Dot : MonoBehaviour {
 
     public bool isMatched = false;
 
-	void Start () {
+    void Start () {
         StartCoroutine(MoveDotToCR());
         StartCoroutine(DestroyDot());
-	}
+    }
 
-	//*****************************************
-	void Update () {
-        	 
-	}
-	//*****************************************
+    //*****************************************
+    void Update () {
+             
+    }
+    //*****************************************
 
 
     public IEnumerator MoveDotToCR()
@@ -56,15 +56,24 @@ public class Dot : MonoBehaviour {
                 // 목표지점으로 smoothDamp로 이동시킨다
                 transform.position = Vector2.SmoothDamp(transform.position, new Vector2(column, row), ref velocity, 0.3f, 10f, Time.deltaTime);
 
+                Debug.Log("Going");
+
                 // 목표지점에 거의 가까워지면
                 if (Mathf.Abs(transform.position.x - column) < 0.05f && Mathf.Abs(transform.position.y - row) < 0.05f)
                 {
                     // 목표지점으로 포개어버리고
                     this.gameObject.transform.position = new Vector2(column, row);
 
+                    Debug.Log("Goal in");
+
                     // 조건을 초기화
                     swipeDotTF = false;
-                    dropDotTF = false;
+
+                    if (dropDotTF)
+                    {
+                        dropDotTF = false;
+                        DotManager.dotManager.howManyDotsNeedDrop--;
+                    }
 
                     yield return null;
                 }
@@ -94,8 +103,8 @@ public class Dot : MonoBehaviour {
 
                 // board를 초기화시키, Dot을 destroy시킨다
                 Board.board.allDots[column, row] = null;
-
                 Destroy(this.gameObject);
+
                 destroyDotTF = false;
             }
 

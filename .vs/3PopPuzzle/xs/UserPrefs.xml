@@ -2,8 +2,8 @@
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Script/DotManager.cs">
     <Files>
       <File FileName="Assets/Script/Board.cs" Line="13" Column="27" />
-      <File FileName="Assets/Script/Dot.cs" Line="14" Column="1" />
-      <File FileName="Assets/Script/DotManager.cs" Line="448" Column="1" />
+      <File FileName="Assets/Script/DotManager.cs" Line="79" Column="1" />
+      <File FileName="Assets/Script/Dot.cs" Line="74" Column="43" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
