@@ -27,6 +27,8 @@ public class DotManager : MonoBehaviour {
     public int howManyDotsDestroy = 0;
 
     private bool matchExist = false;
+    private bool startState = false;
+    private bool matchDone = false;
 
     // 
     private void Awake()
@@ -44,7 +46,6 @@ public class DotManager : MonoBehaviour {
     void Start() {
         state = State.stable;
         StartCoroutine(SwitchStateCo());
-
     }
 
 
@@ -71,14 +72,10 @@ public class DotManager : MonoBehaviour {
                         // raycast로 마우스가 있는 위치의 object를 가져온다
                         if (Input.GetMouseButtonDown(0))
                         {
-                            Debug.Log("High");
-
                             firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                             Ray2D ray = new Ray2D(firstTouchPosition, Vector2.zero);
                             RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
-
-                            Debug.Log(hit.collider.gameObject.name);
-
+                            
                             // Dot을 클릭
                             if (hit.collider != null)
                             {
@@ -103,6 +100,8 @@ public class DotManager : MonoBehaviour {
                             swipeAngle = Mathf.Atan2(finalTouchPosition.y - firstTouchPosition.y, finalTouchPosition.x - firstTouchPosition.x) / Mathf.PI * 180;
 
                             state = State.swipeDot;
+                            startState = true;
+
                         }
 
                         break;
@@ -110,63 +109,101 @@ public class DotManager : MonoBehaviour {
 
                 case State.swipeDot:
                     {
-                        // Dot의 column, row를 이동시킨다 (화면상이 아닌 데이터상에서 움직임)
-                        SwipeDotsCR();
+                        Debug.Log("swipeDot State");
 
-                        // Dot을 실제로 움직이기
-                        // selected Dot은 Mouse Down Input이 들어오면서 결정된다.
-                        selectedDot.GetComponent<Dot>().swipeDotTF = true;
-                        // neighbor Dot은 Mouse Up Input을 통한 각도처리와 함께 결정된다.
-                        neighborDot.GetComponent<Dot>().swipeDotTF = true;
-
-                        if (selectedDot.GetComponent<Dot>().swipeDotTF == false && !neighborDot.GetComponent<Dot>().swipeDotTF == false)
+                        // Swipe 명령이 들엉온 이후 실행된 이후 한 번만 실행하는 메서드
+                        if (startState)
                         {
+                            // Dot의 column, row를 이동시킨다 (화면상이 아닌 데이터상에서 움직임)
+                            SwipeDotsCR();
+
+                            // Dot을 실제로 움직이기
+                            // selected Dot은 Mouse Down Input이 들어오면서 결정된다.
+                            selectedDot.GetComponent<Dot>().swipeDotTF = true;
+                            // neighbor Dot은 Mouse Up Input을 통한 각도처리와 함께 결정된다.
+                            neighborDot.GetComponent<Dot>().swipeDotTF = true;
+
+                            startState = false;
+                        }
+
+                        // state 탈출 조건 : 두 Dot이 모두 이동을 마쳤을 때
+                        if (selectedDot.GetComponent<Dot>().swipeDotTF == false && neighborDot.GetComponent<Dot>().swipeDotTF == false)
+                        {
+                            Debug.Log("Swipe Done");
+
+                            // checkMatch State로 이동
                             state = State.checkMatch;
                         }
+
+                        break;
                     }
-                    break;
 
                 case State.checkMatch:
                     {
+                        Debug.Log("checkMatch State");
+
                         // 모든 매치검사를 실행
                         MatchingDot();
 
-                        Debug.Log(matchExist.ToString());
-
-                        if (matchExist)
+                        // match 결과 match가 존재할 때 => isMatched인 Dot을 Destroy 할 차례
+                        if (matchExist && matchDone)
                         {
+                            startState = true;
                             state = State.destroyMatch;
-
                         }
-                        else
+
+                        // match 결과 match가 없을 때 => Swipe한 Dot이 다시 자기 자리로 돌아가야함
+                        else if (!matchExist && matchDone) 
                         {
+                            // *******************************************************************  자기자리로 돌아가는 메서드 구현해야함
                             state = State.stable;
                         }
+
                     }
                     break;
 
                 case State.destroyMatch:
                     {
-                        // 모든 dot에 대해 isMatched 를 확인해 destroy 코루틴을 실행시킨다
-                        foreach (GameObject dot in Board.board.allDots)
+                        Debug.Log("destroyMatch Executed");
+                        if (startState)
                         {
-                            if (dot != null)
+                            // 모든 dot에 대해 isMatched 를 확인해 destroy 코루틴을 실행시킨다
+                            foreach (GameObject dot in Board.board.allDots)
                             {
-                                if (dot.GetComponent<Dot>().isMatched)
+                                if (dot != null)
                                 {
-                                    dot.GetComponent<Dot>().destroyDotTF = true;
+                                    if (dot.GetComponent<Dot>().isMatched)
+                                    {
+                                        Debug.Log("destroy");
+                                        // howManyDotsDestroy 카운트를 올려 다 터졌는지 검사
+                                        howManyDotsDestroy++;
+
+                                        // destroyDotTF true로 체크하여 각 Dot의 Dot Script를 통해 제거
+                                        dot.GetComponent<Dot>().destroyDotTF = true;
+                                    }
                                 }
                             }
+                            startState = false;
                         }
-                        state = State.dropDot;
 
+                        if (howManyDotsDestroy == 0)
+                        {
+                            state = State.dropDot;
+                            startState = true;
+                        }
                     }
                     break;
 
                 case State.dropDot:
                     {
-                        // 자기 아래에 null 개수를 확인
-                        CountNulls();
+                        // drop 실행할 때 조건형성을 위해 한 번만 실행할 메서드
+                        if (startState)
+                        {
+                            // 자기 아래에 null 개수를 확인
+                            CountNulls();
+
+                            startState = false;
+                        }
 
                         // 모든 dot에 대해 drop 코루틴을 실행시킨다.
                         foreach (GameObject dot in Board.board.allDots)
@@ -183,12 +220,15 @@ public class DotManager : MonoBehaviour {
 
                         if (howManyDotsNeedDrop == 0)
                         {
+                                                                                        // Refill State 를 만들어 넣어줘야함 
                             state = State.checkMatch;
                         }
                     }
                     break;
             }
-            yield return new WaitForEndOfFrame();
+
+            // yield return null waitfor.. 로 변경하면 Stable State 의 Swipe 동작이 인식되지 않는 현상이 보이므로 수정 X 할 것.
+            yield return null;
         }
     }
 
@@ -269,7 +309,9 @@ public class DotManager : MonoBehaviour {
             return;
         }
 
-        state = State.checkMatch;
+        firstTouchPosition = Vector2.zero;
+        finalTouchPosition = Vector2.zero;
+        swipeAngle = 0;
         return;
     }
 
@@ -280,7 +322,6 @@ public class DotManager : MonoBehaviour {
 
     private void MatchingDot()
     {
-        Debug.Log("Match Execute");
         howManyDotsMatched = 0;
     
         for (int _row = 0; _row < Board.board.height - 2; _row++)
@@ -364,17 +405,17 @@ public class DotManager : MonoBehaviour {
             }
         }
 
-        Debug.Log(howManyDotsMatched);
         if(howManyDotsMatched == 0)
         {
             matchExist = false;
-                  }
+        }
         else
         {
             matchExist = true;
 
         }
 
+        matchDone = true;
         return;
     }
 

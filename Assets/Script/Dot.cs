@@ -55,16 +55,12 @@ public class Dot : MonoBehaviour {
 
                 // 목표지점으로 smoothDamp로 이동시킨다
                 transform.position = Vector2.SmoothDamp(transform.position, new Vector2(column, row), ref velocity, 0.3f, 10f, Time.deltaTime);
-
-                Debug.Log("Going");
-
+                
                 // 목표지점에 거의 가까워지면
                 if (Mathf.Abs(transform.position.x - column) < 0.05f && Mathf.Abs(transform.position.y - row) < 0.05f)
                 {
                     // 목표지점으로 포개어버리고
                     this.gameObject.transform.position = new Vector2(column, row);
-
-                    Debug.Log("Goal in");
 
                     // 조건을 초기화
                     swipeDotTF = false;
@@ -92,9 +88,9 @@ public class Dot : MonoBehaviour {
             if (destroyDotTF)
             {
                 // 1초 기다린 후 (swipe나 drop하는 경우 움직이는 액션을 기다려준다)
-                yield return new WaitForSeconds(1f);
+                yield return new WaitForSeconds(0.3f);
 
-                // 색을 잠시 변하게 하고
+                                // 색을 잠시 변하게 하고
                 SpriteRenderer sprite = GetComponent<SpriteRenderer>();
                 sprite.color = new Color(0.5f, 0.5f, 0.5f);
 
@@ -105,10 +101,11 @@ public class Dot : MonoBehaviour {
                 Board.board.allDots[column, row] = null;
                 Destroy(this.gameObject);
 
+                DotManager.dotManager.howManyDotsDestroy--;
                 destroyDotTF = false;
             }
 
-            yield return new WaitForEndOfFrame();
+            yield return null;
         }
     }
 }
