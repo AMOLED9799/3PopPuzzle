@@ -68,12 +68,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a68950eb499b49f2beacbd02a20dc63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  swipeAngle: 0
   column: 0
   row: 0
-  targetX: 0
-  targetY: 0
+  nullCount: 0
+  swipeDotTF: 0
+  destroyDotTF: 0
+  dropDotTF: 0
+  firstSet: 0
+  refillDotTF: 0
+  dot2Drop: 0
   isMatched: 0
+  velocity: {x: 0, y: 0}
 --- !u!212 &212766220020990202
 SpriteRenderer:
   m_ObjectHideFlags: 1

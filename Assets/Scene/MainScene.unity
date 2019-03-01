@@ -145,7 +145,7 @@ MonoBehaviour:
   tilePrefab: {fileID: 1302825258247984, guid: 786afe103f93642cfb747df7f48d7677, type: 2}
   needChecking: 0
   dots:
-  - {fileID: 1631198728216866, guid: 7456725e82d384c8bba65982055092ef, type: 2}
+  - {fileID: 1021409312756618, guid: 99a269b8824824b9083ce100f5a7c010, type: 2}
   - {fileID: 1296687669891066, guid: 2e79196a3a9dd4fc49d77e433bc540ce, type: 2}
   - {fileID: 1375496514699450, guid: e297f57afe73f453495268c7605668a2, type: 2}
   - {fileID: 1450899844939032, guid: 70984f2eb82f04b99a9e774463a5ef73, type: 2}
@@ -511,6 +511,7 @@ MonoBehaviour:
   howManyDotsNeedDrop: 0
   howManyDotsMatched: 0
   howManyDotsDestroy: 0
+  howManyDotsDestroyBySpecial: 0
   state: 3
 --- !u!1 &1537228404
 GameObject:

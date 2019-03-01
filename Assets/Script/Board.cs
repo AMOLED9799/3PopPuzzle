@@ -48,8 +48,8 @@ public class Board : MonoBehaviour {
 				dot.transform.parent = this.transform;
 				dot.name = "dot";
 				allDots [i, j] = dot;
-				dot.GetComponent<Dot> ().column = i;
-				dot.GetComponent<Dot> ().row = j;
+				dot.GetComponent<Dot_Mom> ().column = i;
+				dot.GetComponent<Dot_Mom> ().row = j;
 			}
 		}
 	}

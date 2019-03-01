@@ -47,3 +47,4 @@
 /Users/parksungmin/Unity/3PopPuzzle/obj/Debug/Assembly-CSharp.dll.mdb
 /Users/parksungmin/Unity/3PopPuzzle/Temp/bin/Debug/SyntaxTree.VisualStudio.Unity.Bridge.dll
 /Users/parksungmin/Unity/3PopPuzzle/Temp/bin/Debug/SyntaxTree.VisualStudio.Unity.Messaging.dll
+/Users/parksungmin/Unity/3PopPuzzle/obj/Debug/.NETFramework,Version=v4.6.AssemblyAttribute.cs
