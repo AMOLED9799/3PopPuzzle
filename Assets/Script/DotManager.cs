@@ -38,7 +38,7 @@ public class DotManager : MonoBehaviour {
 
     public enum State
     {
-        stable, swipeDot, checkMatch, destroyMatch, dropDot
+        stable, swipeDot, checkMatch, destroyMatch, dropDot, RefillDot
     }
 
     public State state;
@@ -117,6 +117,11 @@ public class DotManager : MonoBehaviour {
                             // Dot의 column, row를 이동시킨다 (화면상이 아닌 데이터상에서 움직임)
                             SwipeDotsCR();
 
+                            if(state == State.stable)
+                            {
+                                break;
+                            }
+
                             // Dot을 실제로 움직이기
                             // selected Dot은 Mouse Down Input이 들어오면서 결정된다.
                             selectedDot.GetComponent<Dot>().swipeDotTF = true;
@@ -148,6 +153,7 @@ public class DotManager : MonoBehaviour {
                         // match 결과 match가 존재할 때 => isMatched인 Dot을 Destroy 할 차례
                         if (matchExist && matchDone)
                         {
+                            matchDone = false;
                             startState = true;
                             state = State.destroyMatch;
                         }
@@ -155,6 +161,7 @@ public class DotManager : MonoBehaviour {
                         // match 결과 match가 없을 때 => Swipe한 Dot이 다시 자기 자리로 돌아가야함
                         else if (!matchExist && matchDone) 
                         {
+                            matchDone = false;
                             // *******************************************************************  자기자리로 돌아가는 메서드 구현해야함
                             state = State.stable;
                         }
@@ -200,28 +207,30 @@ public class DotManager : MonoBehaviour {
                         if (startState)
                         {
                             // 자기 아래에 null 개수를 확인
-                            CountNulls();
+                            // 자기가 갈 위치에 미리 Column, Row를 옮겨놓음
+                            // Refill할 Dot까지 미리 Positioning 해 놓기
+
+                            CountNullsIndividual();
+
+                            // 모든 dot에 대해 drop 코루틴을 실행시킨다.
+                            foreach (GameObject dot in Board.board.allDots)
+                            {
+                                if (dot != null && dot.GetComponent<Dot>().dot2Drop)
+                                {
+                                    dot.GetComponent<Dot>().dropDotTF = true;
+                                }
+                            }
 
                             startState = false;
                         }
 
-                        // 모든 dot에 대해 drop 코루틴을 실행시킨다.
-                        foreach (GameObject dot in Board.board.allDots)
-                        {
-                            if (dot != null)
-                            {
-                                if (dot.GetComponent<Dot>().nullCount != 0)
-                                {
-                                    dot.GetComponent<Dot>().firstSet = true;
-                                    dot.GetComponent<Dot>().dropDotTF = true;
-                                }
-                            }
-                        }
+
 
                         if (howManyDotsNeedDrop == 0)
                         {
                                                                                         // Refill State 를 만들어 넣어줘야함 
                             state = State.checkMatch;
+                            startState = true;
                         }
                     }
                     break;
@@ -306,6 +315,7 @@ public class DotManager : MonoBehaviour {
             firstTouchPosition = Vector2.zero;
             Debug.Log("swipe 각도가 애매하여 예외로 처리함");
 
+            state = State.stable;
             return;
         }
 
@@ -409,10 +419,10 @@ public class DotManager : MonoBehaviour {
         {
             matchExist = false;
         }
+
         else
         {
             matchExist = true;
-
         }
 
         matchDone = true;
@@ -420,7 +430,7 @@ public class DotManager : MonoBehaviour {
     }
 
 
-    private void CountNulls()
+    private void CountNullsIndividual()
     {
         howManyDotsNeedDrop = 0;
 
@@ -430,22 +440,40 @@ public class DotManager : MonoBehaviour {
 
             for (int _row = 0; _row < Board.board.height; _row++)
             {
+                // 자기가 가야할 좌표로 미리 값을 바꿔놓음
                 if (Board.board.allDots[_column, _row] == null)
                 {
                     nullCount++;
                 }
                 else if (nullCount != 0)
                 {
-                    Board.board.allDots[_column, _row].GetComponent<Dot>().nullCount = nullCount;
+                    Board.board.allDots[_column, _row].GetComponent<Dot>().row -= nullCount;
+                    Board.board.allDots[_column, _row - nullCount] = Board.board.allDots[_column, _row];
+                    Board.board.allDots[_column, _row - nullCount].GetComponent<Dot>().dot2Drop = true;
+                    Board.board.allDots[_column, _row] = null;
+
                     howManyDotsNeedDrop++;
                 }
             }
+
+            // Refill 을 위한 dot을 미리 만들어 놓기
+
+            for (int _dropRow = Board.board.height; _dropRow < Board.board.height + nullCount; _dropRow++)
+            {
+                GameObject dot = Instantiate(Board.board.dots[Random.Range(0, Board.board.dots.Length)], new Vector2(_column, _dropRow), Quaternion.identity);
+                dot.name = "dotNew";
+                dot.transform.parent = Board.board.transform;
+
+                Board.board.allDots[_column, _dropRow - nullCount] = dot;
+                dot.GetComponent<Dot>().column = _column;
+                dot.GetComponent<Dot>().row = _dropRow - nullCount;
+
+                howManyDotsNeedDrop++;
+                Board.board.allDots[_column, _dropRow - nullCount].GetComponent<Dot>().dot2Drop = true;
+
+            }
         }
-
-
     }
-
-
 }
 
 /*
