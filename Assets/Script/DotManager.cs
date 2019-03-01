@@ -117,6 +117,11 @@ public class DotManager : MonoBehaviour {
                             // Dot의 column, row를 이동시킨다 (화면상이 아닌 데이터상에서 움직임)
                             SwipeDotsCR();
 
+                            if(state == State.stable)
+                            {
+                                break;
+                            }
+
                             // Dot을 실제로 움직이기
                             // selected Dot은 Mouse Down Input이 들어오면서 결정된다.
                             selectedDot.GetComponent<Dot>().swipeDotTF = true;
@@ -210,7 +215,7 @@ public class DotManager : MonoBehaviour {
                             // 모든 dot에 대해 drop 코루틴을 실행시킨다.
                             foreach (GameObject dot in Board.board.allDots)
                             {
-                                if (dot != null)
+                                if (dot != null && dot.GetComponent<Dot>().dot2Drop)
                                 {
                                     dot.GetComponent<Dot>().dropDotTF = true;
                                 }
@@ -310,6 +315,7 @@ public class DotManager : MonoBehaviour {
             firstTouchPosition = Vector2.zero;
             Debug.Log("swipe 각도가 애매하여 예외로 처리함");
 
+            state = State.stable;
             return;
         }
 
@@ -443,6 +449,7 @@ public class DotManager : MonoBehaviour {
                 {
                     Board.board.allDots[_column, _row].GetComponent<Dot>().row -= nullCount;
                     Board.board.allDots[_column, _row - nullCount] = Board.board.allDots[_column, _row];
+                    Board.board.allDots[_column, _row - nullCount].GetComponent<Dot>().dot2Drop = true;
                     Board.board.allDots[_column, _row] = null;
 
                     howManyDotsNeedDrop++;
@@ -462,6 +469,7 @@ public class DotManager : MonoBehaviour {
                 dot.GetComponent<Dot>().row = _dropRow - nullCount;
 
                 howManyDotsNeedDrop++;
+                Board.board.allDots[_column, _dropRow - nullCount].GetComponent<Dot>().dot2Drop = true;
 
             }
         }

@@ -17,11 +17,12 @@ public class Dot : MonoBehaviour {
     public bool refillDotTF = false;
 
     private bool stateChanged = false;
-    
+    public bool dot2Drop = false;
+    public bool isMatched = false;
+
 
     public Vector2 velocity = Vector2.zero;
 
-    public bool isMatched = false;
 
     void Start () {
         StartCoroutine(MoveDotToCR());
@@ -60,7 +61,7 @@ public class Dot : MonoBehaviour {
                     swipeDotTF = false;
                     refillDotTF = false;
                     dropDotTF = false;
-
+                    dot2Drop = false;
 
                     yield return null;
                 }
