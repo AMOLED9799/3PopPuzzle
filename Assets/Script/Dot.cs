@@ -14,9 +14,10 @@ public class Dot : MonoBehaviour {
     public bool destroyDotTF = false;
     public bool dropDotTF = false;
     public bool firstSet = false;
-
+    public bool refillDotTF = false;
 
     private bool stateChanged = false;
+    
 
     public Vector2 velocity = Vector2.zero;
 
@@ -38,21 +39,8 @@ public class Dot : MonoBehaviour {
     {
         for(; ;)
         {
-            if (swipeDotTF || dropDotTF)
+            if (swipeDotTF || dropDotTF || refillDotTF)
             {
-                // dropDot으로 들어온 경우
-                if (dropDotTF && firstSet)
-                {
-                    // allDots 값을 이동시켜주고
-                    Board.board.allDots[column, row - nullCount] = Board.board.allDots[column, row];
-                    Board.board.allDots[column, row] = null;
-                    row -= nullCount;
-
-                    // nullCount를 초기화
-                    nullCount = 0;
-                    firstSet = false;
-                }
-
                 // 목표지점으로 smoothDamp로 이동시킨다
                 transform.position = Vector2.SmoothDamp(transform.position, new Vector2(column, row), ref velocity, 0.3f, 10f, Time.deltaTime);
                 
@@ -63,13 +51,16 @@ public class Dot : MonoBehaviour {
                     this.gameObject.transform.position = new Vector2(column, row);
 
                     // 조건을 초기화
-                    swipeDotTF = false;
-
+                    
                     if (dropDotTF)
                     {
-                        dropDotTF = false;
                         DotManager.dotManager.howManyDotsNeedDrop--;
                     }
+
+                    swipeDotTF = false;
+                    refillDotTF = false;
+                    dropDotTF = false;
+
 
                     yield return null;
                 }

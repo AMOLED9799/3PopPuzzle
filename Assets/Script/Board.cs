@@ -14,6 +14,7 @@ public class Board : MonoBehaviour {
 
 	public GameObject[] dots;
 	public GameObject [,] allDots;
+    public GameObject[,] allRefillDots;
 
     private void Awake()
     {
@@ -23,10 +24,9 @@ public class Board : MonoBehaviour {
     void Start () {
 		allTiles = new BackgroundTile[width, height];
 		allDots = new GameObject[width, height];
-
+        allRefillDots = new GameObject[width, height];
 		SetUp ();
 
-		// StartCoroutine (MatchCheckerCo ());
 	}
 	
 	private void SetUp() {
@@ -43,10 +43,10 @@ public class Board : MonoBehaviour {
 					dotToUse = Random.Range (0, dots.Length);
 				}
 
-				GameObject dot = Instantiate (dots [dotToUse], tempPosition, Quaternion.identity);
-
+              GameObject dot = Instantiate (dots [dotToUse], tempPosition, Quaternion.identity);
+                
 				dot.transform.parent = this.transform;
-				dot.name = "( " + i + ", " + j + " )";
+				dot.name = "dot";
 				allDots [i, j] = dot;
 				dot.GetComponent<Dot> ().column = i;
 				dot.GetComponent<Dot> ().row = j;
