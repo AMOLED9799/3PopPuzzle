@@ -29,6 +29,7 @@ public class Vertical_Dot : Dot_Mom {
             {
                 for(int _row = 0; _row < Board.board.height; _row++)
                 {
+
                     // null 이 아닌 Dot 중에서
                     if (Board.board.allDots[column, _row] == null)
                     {
@@ -68,4 +69,6 @@ public class Vertical_Dot : Dot_Mom {
             yield return null;
         }
     }
+
+    
 }

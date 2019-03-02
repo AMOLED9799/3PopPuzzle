@@ -1,13 +1,14 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Script/Horizontal_Dot.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Script/NewBehaviourScript.cs">
     <Files>
       <File FileName="Assets/Script/Board.cs" Line="50" Column="26" />
-      <File FileName="Assets/Script/DotManager.cs" Line="85" Column="29" />
+      <File FileName="Assets/Script/DotManager.cs" Line="85" Column="1" />
       <File FileName="Assets/Script/Dot.cs" Line="40" Column="60" />
-      <File FileName="Assets/Script/Vertical_Dot.cs" Line="23" Column="1" />
+      <File FileName="Assets/Script/Vertical_Dot.cs" Line="46" Column="22" />
       <File FileName="Assets/Script/Dot_Mom.cs" Line="54" Column="35" />
-      <File FileName="Assets/Script/UI_Manager.cs" Line="21" Column="1" />
-      <File FileName="Assets/Script/Horizontal_Dot.cs" Line="10" Column="3" />
+      <File FileName="Assets/Script/UI_Manager.cs" Line="19" Column="3" />
+      <File FileName="Assets/Script/Horizontal_Dot.cs" Line="45" Column="42" />
+      <File FileName="Assets/Script/NewBehaviourScript.cs" Line="13" Column="18" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

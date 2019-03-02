@@ -25,19 +25,24 @@ public class Horizontal_Dot : Dot_Mom {
                 for (int _column = 0; _column < Board.board.width; _column++)
                 {
                     // null 이 아닌 Dot 중에서
-                    if (Board.board.allDots[_column, row] == null)
+                    if (Board.board.allDots[column - _column, row] != null)
                     {
-                        Debug.Log("삐빅");
-                    }
-
-                    else
-                    {
-                        if (!Board.board.allDots[_column, row].GetComponent<Dot_Mom>().destroyDotTF & !Board.board.allDots[_column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF)
+                        if (!Board.board.allDots[column - _column, row].GetComponent<Dot_Mom>().destroyDotTF & !Board.board.allDots[column - _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF)
                         {
-                            Board.board.allDots[_column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF = true;
+                            Board.board.allDots[column - _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF = true;
                             DotManager.dotManager.howManyDotsDestroy++;
                         }
                     }
+                    if (Board.board.allDots[column + _column, row] != null)
+                    {
+                        if(!Board.board.allDots[_column + column, row].GetComponent<Dot_Mom>().destroyDotTF & !Board.board.allDots[column + _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF)
+                        {
+                            Board.board.allDots[column + _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF = true;
+                            DotManager.dotManager.howManyDotsDestroy++;
+                        }
+                    }
+
+                    yield return new Wait
                 }
 
                 // 1초 기다린 후 (swipe나 drop하는 경우 움직이는 액션을 기다려준다)
