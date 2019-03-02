@@ -29,18 +29,19 @@ public class Vertical_Dot : Dot_Mom {
             {
                 for(int _row = 0; _row < Board.board.height; _row++)
                 {
+                    // null 이 아닌 Dot 중에서
                     if (Board.board.allDots[column, _row] == null)
                     {
                         Debug.Log("삐빅");
                     }
+
                     else
                     {
-                        Board.board.allDots[column, _row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF = true;
-                        if(destroyDotTF)
+                        if(!Board.board.allDots[column, _row].GetComponent<Dot_Mom>().destroyDotTF & !Board.board.allDots[column, _row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF)
                         {
-                            DotManager.dotManager.howManyDotsDestroy--;
+                            Board.board.allDots[column, _row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF = true;
+                            DotManager.dotManager.howManyDotsDestroy++;
                         }
-                        DotManager.dotManager.howManyDotsDestroyBySpecial++;
                     }
                 }
 
@@ -58,8 +59,7 @@ public class Vertical_Dot : Dot_Mom {
                 Board.board.allDots[column, row] = null;
                 Destroy(this.gameObject);
 
-                if(destroyDotTF)
-                    DotManager.dotManager.howManyDotsDestroy--;
+                DotManager.dotManager.howManyDotsDestroy--;
 
                 destroyDotTF = false;
                 destroyedBySpecialDotTF = false;

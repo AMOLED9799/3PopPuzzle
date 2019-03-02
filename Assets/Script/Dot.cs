@@ -37,8 +37,7 @@ public class Dot : Dot_Mom {
                 Board.board.allDots[column, row] = null;
                 Destroy(this.gameObject);
 
-                if(destroyDotTF)
-                    DotManager.dotManager.howManyDotsDestroy--;
+                DotManager.dotManager.howManyDotsDestroy--;
 
                 destroyDotTF = false;
                 destroyedBySpecialDotTF = false;

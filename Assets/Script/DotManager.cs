@@ -25,7 +25,6 @@ public class DotManager : MonoBehaviour {
     public int howManyDotsNeedDrop = 0;
     public int howManyDotsMatched = 0;
     public int howManyDotsDestroy = 0;
-    public int howManyDotsDestroyBySpecial = 0;
 
     private bool matchExist = false;
     private bool startState = false;
