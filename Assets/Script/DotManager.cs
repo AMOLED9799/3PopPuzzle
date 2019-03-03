@@ -386,6 +386,16 @@ public class DotManager : MonoBehaviour {
 
                             howManyDotsMatched++;
 
+                            // Special Dot에 대해 검사 ( 가로 4개 )
+                            if((Board.board.allDots[_column, _row+3] != null && Board.board.allDots[_column, _row].gameObject.CompareTag(Board.board.allDots[_column + 3, _row].gameObject.tag))) {
+                                Board.board.allDots[_column + 3, _row].GetComponent<Dot_Mom>().isMatched = true;
+
+                                // if selectedDot이 포함되어 있다면 ( Swipe 의 결과로 Special Dot이 Gen 되는거라면 )
+                                if((Board.board.allDots[_column + 1, _row] == selectedDot || Board.board.allDots[_column + 2, _row] == selectedDot)) {
+                                    StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 1));
+                                }
+                            }
+
                         }
                     }
 
@@ -397,6 +407,16 @@ public class DotManager : MonoBehaviour {
                             Board.board.allDots[_column, _row + 2].GetComponent<Dot_Mom>().isMatched = true;
 
                             howManyDotsMatched++;
+
+                            // Special Dot에 대해 검사 ( 세로 4개 )
+                            if(Board.board.allDots[_column, _row = 3] != null && Board.board.allDots[_column, _row].CompareTag(Board.board.allDots[_column, _row+3].gameObject.tag)) {
+                                Board.board.allDots[_column, _row +3].GetComponent<Dot_Mom>().isMatched = true;
+
+                                if((Board.board.allDots[_column, _row+1] == selectedDot || Board.board.allDots[_column, _row+2] == selectedDot)) {
+                                    StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 2));
+                                }
+
+                            }
                         }
                     }
                 }

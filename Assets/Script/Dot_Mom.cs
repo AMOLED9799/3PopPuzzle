@@ -13,6 +13,7 @@ public class Dot_Mom : MonoBehaviour
     public bool dropDotTF = false;
     public bool firstSet = false;
     public bool refillDotTF = false;
+
     public bool destroyedBySpecialDotTF = false;
 
     private bool stateChanged = false;

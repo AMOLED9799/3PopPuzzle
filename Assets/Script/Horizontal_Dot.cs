@@ -22,28 +22,7 @@ public class Horizontal_Dot : Dot_Mom {
             // destroyDotTF가 true일 때
             if (destroyDotTF || destroyedBySpecialDotTF)
             {
-                for (int _column = 0; _column < Board.board.width; _column++)
-                {
-                    // null 이 아닌 Dot 중에서
-                    if (Board.board.allDots[column - _column, row] != null)
-                    {
-                        if (!Board.board.allDots[column - _column, row].GetComponent<Dot_Mom>().destroyDotTF & !Board.board.allDots[column - _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF)
-                        {
-                            Board.board.allDots[column - _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF = true;
-                            DotManager.dotManager.howManyDotsDestroy++;
-                        }
-                    }
-                    if (Board.board.allDots[column + _column, row] != null)
-                    {
-                        if(!Board.board.allDots[_column + column, row].GetComponent<Dot_Mom>().destroyDotTF & !Board.board.allDots[column + _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF)
-                        {
-                            Board.board.allDots[column + _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF = true;
-                            DotManager.dotManager.howManyDotsDestroy++;
-                        }
-                    }
-
-                    yield return new Wait
-                }
+                StartCoroutine(horizontalDominoCo());
 
                 // 1초 기다린 후 (swipe나 drop하는 경우 움직이는 액션을 기다려준다)
                 yield return new WaitForSeconds(0.3f);
@@ -69,4 +48,31 @@ public class Horizontal_Dot : Dot_Mom {
         }
     }
 
+    private IEnumerator horizontalDominoCo() {
+        for (int _column = 0; _column < Board.board.width; _column++)
+        {
+            if(column - _column < 0 && column + _column > Board.board.width)
+                break;
+
+            // null 이 아닌 Dot 중에서
+            if (column - _column >= 0 && Board.board.allDots[column - _column, row] != null)
+            {
+                if (!Board.board.allDots[column - _column, row].GetComponent<Dot_Mom>().destroyDotTF & !Board.board.allDots[column - _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF)
+                {
+                    Board.board.allDots[column - _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF = true;
+                    DotManager.dotManager.howManyDotsDestroy++;
+                }
+            }
+            if (_column + column < Board.board.width && Board.board.allDots[column + _column, row] != null)
+            {
+                if(!Board.board.allDots[_column + column, row].GetComponent<Dot_Mom>().destroyDotTF & !Board.board.allDots[column + _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF)
+                {
+                    Board.board.allDots[column + _column, row].GetComponent<Dot_Mom>().destroyedBySpecialDotTF = true;
+                    DotManager.dotManager.howManyDotsDestroy++;
+                }
+            }
+
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
 }
