@@ -22,7 +22,7 @@ public class Horizontal_Dot : Dot_Mom {
             // destroyDotTF가 true일 때
             if (destroyDotTF || destroyedBySpecialDotTF)
             {
-                StartCoroutine(horizontalDominoCo());
+                StartCoroutine(HorizontalDominoCo());
 
                 // 1초 기다린 후 (swipe나 drop하는 경우 움직이는 액션을 기다려준다)
                 yield return new WaitForSeconds(0.3f);
@@ -48,7 +48,7 @@ public class Horizontal_Dot : Dot_Mom {
         }
     }
 
-    private IEnumerator horizontalDominoCo() {
+    private IEnumerator HorizontalDominoCo() {
         for (int _column = 0; _column < Board.board.width; _column++)
         {
             if(column - _column < 0 && column + _column > Board.board.width)

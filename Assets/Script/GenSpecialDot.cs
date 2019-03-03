@@ -9,7 +9,7 @@ public class GenSpecialDot : MonoBehaviour {
 	public GameObject[] horizontalDots;
 	public GameObject[] verticalDots;
 
-	void awake() {
+	void Awake() {
 		genSpecialDot = this;
 	}
 	// Use this for initialization
@@ -23,30 +23,62 @@ public class GenSpecialDot : MonoBehaviour {
 	}
 
 	public IEnumerator GenSpecialDotCo(string dotTag, Vector2 genPosition, int direction) {
-		// direction _ 1 : vertical, 2 : horizontal
+		// direction _ 1 : horizontal, 2 : vertical
 		while(true) {
+            Debug.Log("Coroutine 실행 중 ");
 			if(Board.board.allDots[(int)genPosition.x, (int)genPosition.y] == null) {
-				if(direction == 1) {
-					int dotNumber = 0;
-					for(dotNumber = 0; dotNumber < horizontalDots.Length; dotNumber++) {
-						if(horizontalDots[dotNumber].CompareTag(dotTag)){
-							break;
-						}
-					}
-					
-					GameObject dot = Instantiate(horizontalDots[dotNumber], genPosition, Quaternion.identity);
+                switch (direction)
+                {
+                    case 1: // Vertical
+                        {
+                            int dotNumber = 0;
+                            for (dotNumber = 0; dotNumber < horizontalDots.Length; dotNumber++)
+                            {
+                                if (horizontalDots[dotNumber].CompareTag(dotTag))
+                                {
+                                    break;
+                                    
+                                }
+                            }
 
-					dot.name = "horizontal_Dot";
+                            GameObject dot = Instantiate(horizontalDots[dotNumber], genPosition, Quaternion.identity);
 
-					Board.board.allDots[(int) genPosition.x, (int) genPosition.y] = dot;
-					dot.GetComponent<Dot_Mom>().column = (int) genPosition.x;
-					dot.GetComponent<Dot_Mom>().row = (int) genPosition.y;
+                            dot.name = "horizontal_Dot";
 
-					break;
-				}
-			}
-			yield return new WaitForEndOfFrame();
+                            Board.board.allDots[(int)genPosition.x, (int)genPosition.y] = dot;
+                            dot.GetComponent<Dot_Mom>().column = (int)genPosition.x;
+                            dot.GetComponent<Dot_Mom>().row = (int)genPosition.y;
+
+                            break;
+                        }
+
+                    case 2:
+                        {
+                            int dotNumber = 0;
+                            for (dotNumber = 0; dotNumber < horizontalDots.Length; dotNumber++)
+                            {
+                                if (verticalDots[dotNumber].CompareTag(dotTag))
+                                {
+                                    break;
+                                }
+                            }
+
+                            GameObject dot = Instantiate(verticalDots[dotNumber], genPosition, Quaternion.identity);
+
+                            dot.name = "Vertical_Dot";
+
+                            Board.board.allDots[(int)genPosition.x, (int)genPosition.y] = dot;
+                            dot.GetComponent<Dot_Mom>().column = (int)genPosition.x;
+                            dot.GetComponent<Dot_Mom>().row = (int)genPosition.y;
+
+                            break;
+                        }
+                }
+                break;
+
+            }
+            yield return new WaitForEndOfFrame();
 		}
-
+        yield return null;
 	}
 }
