@@ -75,7 +75,7 @@ public class DotManager : MonoBehaviour {
                             firstTouchPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                             Ray2D ray = new Ray2D(firstTouchPosition, Vector2.zero);
                             RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
-                            
+
                             // Dot을 클릭
                             if (hit.collider != null)
                             {
@@ -116,7 +116,7 @@ public class DotManager : MonoBehaviour {
                             // Dot의 column, row를 이동시킨다 (화면상이 아닌 데이터상에서 움직임)
                             SwipeDotsCR();
 
-                            if(state == State.stable)
+                            if (state == State.stable)
                             {
                                 break;
                             }
@@ -138,73 +138,87 @@ public class DotManager : MonoBehaviour {
                             // checkMatch State로 이동
                             state = State.checkMatch;
                         }
-                        
+
                         break;
                     }
 
-                    case State.checkMatch:
+                case State.checkMatch:
                     {
-
-                        // 모든 매치검사를 실행
-                        MatchingDot();
-
-                        // match 결과 match가 존재할 때 => isMatched인 Dot을 Destroy 할 차례
-                        if (matchExist && matchDone)
+                        if (selectedDot != null && selectedDot.CompareTag("ColorPop"))
                         {
-                            matchDone = false;
-                            matchExist = false;
-
-                            swipeHappened = false;
-                            startState = true;
-                            state = State.destroyMatch;
+                            foreach(GameObject dot in Board.board.allDots)
+                            {
+                                if (dot.CompareTag(neighborDot.tag))
+                                {
+                                    dot.GetComponent<Dot_Mom>().isMatched = true;
+                                }
+                            }
                         }
 
-                        // match 결과 match가 없을 때 => Swipe한 Dot이 다시 자기 자리로 돌아가야함
-                        else if (!matchExist && matchDone) 
+                        else
                         {
-                            matchDone = false;
+                            // 모든 매치검사를 실행
+                            MatchingDot();
 
-                            // *******************************************************************  자기자리로 돌아가는 메서드 구현해야함
-                            if(swipeHappened == true)
+                            // match 결과 match가 존재할 때 => isMatched인 Dot을 Destroy 할 차례
+                            if (matchExist && matchDone)
                             {
-                                state = State.swipeDot;
+                                matchDone = false;
+                                matchExist = false;
 
-                                // Board 의 allDots 에서 바꿔주기
-                                GameObject tempObject = Board.board.allDots[neighborDot.GetComponent<Dot_Mom>().column, neighborDot.GetComponent<Dot_Mom>().row];
-                                Board.board.allDots[neighborDot.GetComponent<Dot_Mom>().column, neighborDot.GetComponent<Dot_Mom>().row] = Board.board.allDots[selectedDot.GetComponent<Dot_Mom>().column, selectedDot.GetComponent<Dot_Mom>().row];
-                                Board.board.allDots[selectedDot.GetComponent<Dot_Mom>().column, selectedDot.GetComponent<Dot_Mom>().row] = tempObject;
+                                swipeHappened = false;
+                                startState = true;
+                                state = State.destroyMatch;
+                            }
 
-                                // Row 와 Column 바꿔주기
-                                int goBackColumn = neighborDot.GetComponent<Dot_Mom>().column;
-                                int goBackRow = neighborDot.GetComponent<Dot_Mom>().row;
 
-                                neighborDot.GetComponent<Dot_Mom>().column = selectedDot.GetComponent<Dot_Mom>().column;
-                                neighborDot.GetComponent<Dot_Mom>().row = selectedDot.GetComponent<Dot_Mom>().row;
+                            // match 결과 match가 없을 때 => Swipe한 Dot이 다시 자기 자리로 돌아가야함
+                            else if (!matchExist && matchDone)
+                            {
+                                matchDone = false;
 
-                                selectedDot.GetComponent<Dot_Mom>().column = goBackColumn;
-                                selectedDot.GetComponent<Dot_Mom>().row = goBackRow;
+                                // *******************************************************************  자기자리로 돌아가는 메서드 구현해야함
+                                if (swipeHappened == true)
+                                {
+                                    state = State.swipeDot;
 
-                                // Swipe 실행하도록 TF 켜기
-                                selectedDot.GetComponent<Dot_Mom>().swipeDotTF = true;
-                                neighborDot.GetComponent<Dot_Mom>().swipeDotTF = true;
+                                    // Board 의 allDots 에서 바꿔주기
+                                    GameObject tempObject = Board.board.allDots[neighborDot.GetComponent<Dot_Mom>().column, neighborDot.GetComponent<Dot_Mom>().row];
+                                    Board.board.allDots[neighborDot.GetComponent<Dot_Mom>().column, neighborDot.GetComponent<Dot_Mom>().row] = Board.board.allDots[selectedDot.GetComponent<Dot_Mom>().column, selectedDot.GetComponent<Dot_Mom>().row];
+                                    Board.board.allDots[selectedDot.GetComponent<Dot_Mom>().column, selectedDot.GetComponent<Dot_Mom>().row] = tempObject;
 
-                                // 다시 안정화된 상태로 돌아가기
+                                    // Row 와 Column 바꿔주기
+                                    int goBackColumn = neighborDot.GetComponent<Dot_Mom>().column;
+                                    int goBackRow = neighborDot.GetComponent<Dot_Mom>().row;
+
+                                    neighborDot.GetComponent<Dot_Mom>().column = selectedDot.GetComponent<Dot_Mom>().column;
+                                    neighborDot.GetComponent<Dot_Mom>().row = selectedDot.GetComponent<Dot_Mom>().row;
+
+                                    selectedDot.GetComponent<Dot_Mom>().column = goBackColumn;
+                                    selectedDot.GetComponent<Dot_Mom>().row = goBackRow;
+
+                                    // Swipe 실행하도록 TF 켜기
+                                    selectedDot.GetComponent<Dot_Mom>().swipeDotTF = true;
+                                    neighborDot.GetComponent<Dot_Mom>().swipeDotTF = true;
+
+                                    // 다시 안정화된 상태로 돌아가기
+                                    state = State.stable;
+
+                                }
+
+                                swipeHappened = false;
+
+                                if (selectedDot != null || neighborDot != null)
+                                {
+                                    selectedDot = null;
+                                    neighborDot = null;
+                                }
                                 state = State.stable;
-                                
                             }
 
-                            swipeHappened = false;
-
-                            if (selectedDot != null || neighborDot != null)
-                            {
-                                selectedDot = null;
-                                neighborDot = null;
-                            }
-                            state = State.stable;
                         }
-                        
+                        break;
                     }
-                    break;
 
                 case State.destroyMatch:
                     {
@@ -258,10 +272,10 @@ public class DotManager : MonoBehaviour {
 
                             startState = false;
                         }
-                        
-                        if (howManyDotsNeedDrop == 0 )
+
+                        if (howManyDotsNeedDrop == 0)
                         {
-          
+
                             yield return new WaitForEndOfFrame();
                             state = State.checkMatch;
                             startState = true;
@@ -269,7 +283,7 @@ public class DotManager : MonoBehaviour {
                     }
                     break;
             }
-
+        
             // yield return null waitfor.. 로 변경하면 Stable State 의 Swipe 동작이 인식되지 않는 현상이 보이므로 수정 X 할 것.
             yield return null;
         }
@@ -383,27 +397,56 @@ public class DotManager : MonoBehaviour {
                             Board.board.allDots[_column + 2, _row].GetComponent<Dot_Mom>().isMatched = true;
 
                             howManyDotsMatched++;
-
                             // Special Dot에 대해 검사 ( 가로 4개 )
-                            if((_column + 3 < Board.board.width && Board.board.allDots[_column, _row].gameObject.CompareTag(Board.board.allDots[_column + 3, _row].gameObject.tag))) {
-                                Board.board.allDots[_column + 3, _row].GetComponent<Dot_Mom>().isMatched = true;
+                            if ((_column + 3 < Board.board.width && Board.board.allDots[_column, _row].gameObject.CompareTag(Board.board.allDots[_column + 3, _row].gameObject.tag))) {
 
-                                Debug.Log("4개");
+                                // 가로 5개
+                                if (_column + 4 < Board.board.width && Board.board.allDots[_column, _row].gameObject.CompareTag(Board.board.allDots[_column + 4, _row].gameObject.tag))
+                                {
+                                    Debug.Log("5개");
 
-                                // if selectedDot이 포함되어 있다면 ( Swipe 의 결과로 Special Dot이 Gen 되는거라면 )
-                                if((Board.board.allDots[_column + 1, _row].gameObject == selectedDot || Board.board.allDots[_column + 2, _row].gameObject == selectedDot)) {
-                                    Debug.Log("코루틴 실행");
-                                    StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 2));
+                                    if(Board.board.allDots[_column + 2,_row].gameObject == selectedDot)
+                                    {
+                                        Debug.Log("코루틴 실행");
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 3));
+                                    }
+                                    else if (Board.board.allDots[_column + 2, _row].gameObject == neighborDot)
+                                    {
+                                        Debug.Log("코루틴 실행");
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(neighborDot.tag, neighborDot.transform.position, 3));
+                                    }
+                                    else
+                                    {
+                                        Debug.Log("코루틴 실행");
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].gameObject.tag, Board.board.allDots[_column, _row].transform.position, 3));
+                                    }
                                 }
-                                else if((Board.board.allDots[_column + 1, _row].gameObject == neighborDot || Board.board.allDots[_column + 2, _row].gameObject == neighborDot))
-                                {
-                                    Debug.Log("코루틴 실행");
-                                    StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(neighborDot.tag, neighborDot.transform.position, 2));
-                                }
-                                else
-                                {
-                                    StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].tag, Board.board.allDots[_column, _row].transform.position, 2));
-                                }
+
+                                // Special Dot에 대해 검사 ( 가로 4개 )
+                                else {
+                                    Board.board.allDots[_column + 3, _row].GetComponent<Dot_Mom>().isMatched = true;
+
+                                    Debug.Log("4개");
+
+                                    // if selectedDot이 포함되어 있다면 ( Swipe 의 결과로 Special Dot이 Gen 되는거라면 )
+                                    if ((Board.board.allDots[_column + 1, _row].gameObject == selectedDot || Board.board.allDots[_column + 2, _row].gameObject == selectedDot)) {
+                                        Debug.Log("코루틴 실행");
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 2));
+                                    }
+
+                                    // if neighborDot이 포함되어 있다면 ( 옆에 Dot을 swipe해서 짝을 맞춘 경우 )
+                                    else if ((Board.board.allDots[_column + 1, _row].gameObject == neighborDot || Board.board.allDots[_column + 2, _row].gameObject == neighborDot))
+                                    {
+                                        Debug.Log("코루틴 실행");
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(neighborDot.tag, neighborDot.transform.position, 2));
+                                    }
+
+                                    // Drop에 의해 Match 된 경우
+                                    else
+                                    {
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].tag, Board.board.allDots[_column, _row].transform.position, 2));
+                                    }
+                                } 
                             }
 
                         }

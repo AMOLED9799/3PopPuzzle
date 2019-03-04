@@ -8,6 +8,7 @@ public class GenSpecialDot : MonoBehaviour {
 
 	public GameObject[] horizontalDots;
 	public GameObject[] verticalDots;
+    public GameObject[] specialDots;
 
 	void Awake() {
 		genSpecialDot = this;
@@ -70,6 +71,11 @@ public class GenSpecialDot : MonoBehaviour {
                             dot.GetComponent<Dot_Mom>().column = (int)genPosition.x;
                             dot.GetComponent<Dot_Mom>().row = (int)genPosition.y;
 
+                            break;
+                        }
+
+                    case 3:
+                        {
                             break;
                         }
                 }

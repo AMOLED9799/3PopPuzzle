@@ -7,7 +7,7 @@ public class Vertical_Dot : Dot_Mom {
     void Start()
     {
         StartCoroutine(MoveDotToCR());
-        StartCoroutine(DestroyDot());
+        StartCoroutine(DestroyDotCo());
     }
 
     //*****************************************
@@ -20,7 +20,7 @@ public class Vertical_Dot : Dot_Mom {
 
 
 
-	protected override IEnumerator DestroyDot()
+	protected override IEnumerator DestroyDotCo()
     {
         for (; ; )
         {

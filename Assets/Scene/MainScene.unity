@@ -162,6 +162,48 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &67224686
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 4086975891609770, guid: 7a7c63837f1504486b0de295c6be83db, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 7.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086975891609770, guid: 7a7c63837f1504486b0de295c6be83db, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: -11.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086975891609770, guid: 7a7c63837f1504486b0de295c6be83db, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086975891609770, guid: 7a7c63837f1504486b0de295c6be83db, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086975891609770, guid: 7a7c63837f1504486b0de295c6be83db, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086975891609770, guid: 7a7c63837f1504486b0de295c6be83db, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086975891609770, guid: 7a7c63837f1504486b0de295c6be83db, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086975891609770, guid: 7a7c63837f1504486b0de295c6be83db, type: 2}
+      propertyPath: m_RootOrder
+      value: 5
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: 7a7c63837f1504486b0de295c6be83db, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1 &146022391
 GameObject:
   m_ObjectHideFlags: 0
@@ -592,6 +634,8 @@ MonoBehaviour:
   - {fileID: 1543501147541110, guid: 4d5ef8a25074f4be7a6f6d81615a73ec, type: 2}
   - {fileID: 1255728411888418, guid: d785dd8aa01da4caa8fe840f16aed4f2, type: 2}
   - {fileID: 1128519426199916, guid: 23f27b78427e9406dbde4de15e75d37e, type: 2}
+  specialDots:
+  - {fileID: 1176920528144702, guid: 7a7c63837f1504486b0de295c6be83db, type: 2}
 --- !u!4 &1005213783
 Transform:
   m_ObjectHideFlags: 0

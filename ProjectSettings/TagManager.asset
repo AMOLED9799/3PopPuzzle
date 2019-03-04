@@ -12,6 +12,7 @@ TagManager:
   - Teal Dot
   - Yellow Dot
   - Indigo Dot
+  - ColorPop
   layers:
   - Default
   - TransparentFX

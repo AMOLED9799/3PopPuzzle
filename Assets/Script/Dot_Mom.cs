@@ -20,6 +20,7 @@ public class Dot_Mom : MonoBehaviour
     public bool dot2Drop = false;
     public bool isMatched = false;
 
+    public bool isCheckedForSpecial = false;
     protected bool dominoDone = false;
 
     public Vector2 velocity = Vector2.zero;
@@ -73,7 +74,7 @@ public class Dot_Mom : MonoBehaviour
         }
     }
 
-    protected virtual IEnumerator DestroyDot()
+    protected virtual IEnumerator DestroyDotCo()
     {
         yield return null;
     }

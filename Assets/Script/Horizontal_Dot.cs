@@ -7,7 +7,7 @@ public class Horizontal_Dot : Dot_Mom {
 	// Use this for initialization
 	void Start () {
         StartCoroutine(MoveDotToCR());
-        StartCoroutine(DestroyDot());
+        StartCoroutine(DestroyDotCo());
     }
 
     // Update is called once per frame
@@ -15,7 +15,7 @@ public class Horizontal_Dot : Dot_Mom {
 
     }
 
-      protected override IEnumerator DestroyDot()
+      protected override IEnumerator DestroyDotCo()
     {
         for (; ; )
         {
