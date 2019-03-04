@@ -25,14 +25,16 @@ public class Horizontal_Dot : Dot_Mom {
                 StartCoroutine(HorizontalDominoCo());
 
                 // 1초 기다린 후 (swipe나 drop하는 경우 움직이는 액션을 기다려준다)
-                yield return new WaitForSeconds(0.3f);
+                yield return new WaitForSeconds(0.2f);
 
                 // 색을 잠시 변하게 하고
                 SpriteRenderer sprite = GetComponent<SpriteRenderer>();
                 sprite.color = new Color(0.5f, 0.5f, 0.5f);
 
-                // 0.5초 후에
-                yield return new WaitForSeconds(0.5f);
+                while(!dominoDone)
+                {
+                    yield return new WaitForEndOfFrame();
+                }
 
                 // board를 초기화시키, Dot을 destroy시킨다
                 Board.board.allDots[column, row] = null;
@@ -51,9 +53,10 @@ public class Horizontal_Dot : Dot_Mom {
     private IEnumerator HorizontalDominoCo() {
         for (int _column = 0; _column < Board.board.width; _column++)
         {
-            if(column - _column < 0 && column + _column > Board.board.width)
+            if (column - _column < 0 && column + _column > Board.board.width)
+            {
                 break;
-
+            }
             // null 이 아닌 Dot 중에서
             if (column - _column >= 0 && Board.board.allDots[column - _column, row] != null)
             {
@@ -72,7 +75,9 @@ public class Horizontal_Dot : Dot_Mom {
                 }
             }
 
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.01f);
         }
+
+        dominoDone = true;
     }
 }

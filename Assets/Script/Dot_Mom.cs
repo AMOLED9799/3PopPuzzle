@@ -20,6 +20,8 @@ public class Dot_Mom : MonoBehaviour
     public bool dot2Drop = false;
     public bool isMatched = false;
 
+    protected bool dominoDone = false;
+
     public Vector2 velocity = Vector2.zero;
 
 
@@ -42,7 +44,7 @@ public class Dot_Mom : MonoBehaviour
             if (swipeDotTF || dropDotTF || refillDotTF)
             {
                 // 목표지점으로 smoothDamp로 이동시킨다
-                transform.position = Vector2.SmoothDamp(transform.position, new Vector2(column, row), ref velocity, 0.3f, 10f, Time.deltaTime);
+                transform.position = Vector2.SmoothDamp(transform.position, new Vector2(column, row), ref velocity, 0.1f, 10f, Time.deltaTime);
 
                 // 목표지점에 거의 가까워지면
                 if (Mathf.Abs(transform.position.x - column) < 0.05f && Mathf.Abs(transform.position.y - row) < 0.05f)

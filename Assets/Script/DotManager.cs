@@ -195,6 +195,11 @@ public class DotManager : MonoBehaviour {
 
                             swipeHappened = false;
 
+                            if (selectedDot != null || neighborDot != null)
+                            {
+                                selectedDot = null;
+                                neighborDot = null;
+                            }
                             state = State.stable;
                         }
                         
@@ -439,6 +444,7 @@ public class DotManager : MonoBehaviour {
                     }
                 }
             }
+
         }
 
         // 예외 지역 처리
@@ -550,11 +556,7 @@ public class DotManager : MonoBehaviour {
             matchExist = true;
         }
 
-        if (selectedDot != null || neighborDot != null)
-        {
-            selectedDot = null;
-            neighborDot = null;
-        }
+
 
         matchDone = true;
         howManyDotsMatched = 0;

@@ -25,7 +25,6 @@ public class GenSpecialDot : MonoBehaviour {
 	public IEnumerator GenSpecialDotCo(string dotTag, Vector2 genPosition, int direction) {
 		// direction _ 1 : horizontal, 2 : vertical
 		while(true) {
-            Debug.Log("Coroutine 실행 중 ");
 			if(Board.board.allDots[(int)genPosition.x, (int)genPosition.y] == null) {
                 switch (direction)
                 {
