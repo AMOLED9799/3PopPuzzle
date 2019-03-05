@@ -144,79 +144,67 @@ public class DotManager : MonoBehaviour {
 
                 case State.checkMatch:
                     {
-                        if (selectedDot != null && selectedDot.CompareTag("ColorPop"))
+
+                        // 모든 매치검사를 실행
+                        MatchingDot();
+
+                        // match 결과 match가 존재할 때 => isMatched인 Dot을 Destroy 할 차례
+                        if (matchExist && matchDone)
                         {
-                            foreach(GameObject dot in Board.board.allDots)
-                            {
-                                if (dot.CompareTag(neighborDot.tag))
-                                {
-                                    dot.GetComponent<Dot_Mom>().isMatched = true;
-                                }
-                            }
+                            matchDone = false;
+                            matchExist = false;
+
+                            swipeHappened = false;
+                            startState = true;
+                            state = State.destroyMatch;
                         }
 
-                        else
+
+                        // match 결과 match가 없을 때 => Swipe한 Dot이 다시 자기 자리로 돌아가야함
+                        else if (!matchExist && matchDone)
                         {
-                            // 모든 매치검사를 실행
-                            MatchingDot();
+                            matchDone = false;
 
-                            // match 결과 match가 존재할 때 => isMatched인 Dot을 Destroy 할 차례
-                            if (matchExist && matchDone)
+                            // *******************************************************************  자기자리로 돌아가는 메서드 구현해야함
+                            if (swipeHappened == true)
                             {
-                                matchDone = false;
-                                matchExist = false;
+                                state = State.swipeDot;
 
-                                swipeHappened = false;
-                                startState = true;
-                                state = State.destroyMatch;
-                            }
+                                // Board 의 allDots 에서 바꿔주기
+                                GameObject tempObject = Board.board.allDots[neighborDot.GetComponent<Dot_Mom>().column, neighborDot.GetComponent<Dot_Mom>().row];
+                                Board.board.allDots[neighborDot.GetComponent<Dot_Mom>().column, neighborDot.GetComponent<Dot_Mom>().row] = Board.board.allDots[selectedDot.GetComponent<Dot_Mom>().column, selectedDot.GetComponent<Dot_Mom>().row];
+                                Board.board.allDots[selectedDot.GetComponent<Dot_Mom>().column, selectedDot.GetComponent<Dot_Mom>().row] = tempObject;
 
+                                // Row 와 Column 바꿔주기
+                                int goBackColumn = neighborDot.GetComponent<Dot_Mom>().column;
+                                int goBackRow = neighborDot.GetComponent<Dot_Mom>().row;
 
-                            // match 결과 match가 없을 때 => Swipe한 Dot이 다시 자기 자리로 돌아가야함
-                            else if (!matchExist && matchDone)
-                            {
-                                matchDone = false;
+                                neighborDot.GetComponent<Dot_Mom>().column = selectedDot.GetComponent<Dot_Mom>().column;
+                                neighborDot.GetComponent<Dot_Mom>().row = selectedDot.GetComponent<Dot_Mom>().row;
 
-                                // *******************************************************************  자기자리로 돌아가는 메서드 구현해야함
-                                if (swipeHappened == true)
-                                {
-                                    state = State.swipeDot;
+                                selectedDot.GetComponent<Dot_Mom>().column = goBackColumn;
+                                selectedDot.GetComponent<Dot_Mom>().row = goBackRow;
 
-                                    // Board 의 allDots 에서 바꿔주기
-                                    GameObject tempObject = Board.board.allDots[neighborDot.GetComponent<Dot_Mom>().column, neighborDot.GetComponent<Dot_Mom>().row];
-                                    Board.board.allDots[neighborDot.GetComponent<Dot_Mom>().column, neighborDot.GetComponent<Dot_Mom>().row] = Board.board.allDots[selectedDot.GetComponent<Dot_Mom>().column, selectedDot.GetComponent<Dot_Mom>().row];
-                                    Board.board.allDots[selectedDot.GetComponent<Dot_Mom>().column, selectedDot.GetComponent<Dot_Mom>().row] = tempObject;
+                                // Swipe 실행하도록 TF 켜기
+                                selectedDot.GetComponent<Dot_Mom>().swipeDotTF = true;
+                                neighborDot.GetComponent<Dot_Mom>().swipeDotTF = true;
 
-                                    // Row 와 Column 바꿔주기
-                                    int goBackColumn = neighborDot.GetComponent<Dot_Mom>().column;
-                                    int goBackRow = neighborDot.GetComponent<Dot_Mom>().row;
-
-                                    neighborDot.GetComponent<Dot_Mom>().column = selectedDot.GetComponent<Dot_Mom>().column;
-                                    neighborDot.GetComponent<Dot_Mom>().row = selectedDot.GetComponent<Dot_Mom>().row;
-
-                                    selectedDot.GetComponent<Dot_Mom>().column = goBackColumn;
-                                    selectedDot.GetComponent<Dot_Mom>().row = goBackRow;
-
-                                    // Swipe 실행하도록 TF 켜기
-                                    selectedDot.GetComponent<Dot_Mom>().swipeDotTF = true;
-                                    neighborDot.GetComponent<Dot_Mom>().swipeDotTF = true;
-
-                                    // 다시 안정화된 상태로 돌아가기
-                                    state = State.stable;
-
-                                }
-
-                                swipeHappened = false;
-
-                                if (selectedDot != null || neighborDot != null)
-                                {
-                                    selectedDot = null;
-                                    neighborDot = null;
-                                }
+                                // 다시 안정화된 상태로 돌아가기
                                 state = State.stable;
+
                             }
 
+                            swipeHappened = false;
+
+                            if (selectedDot != null || neighborDot != null)
+                            {
+                                selectedDot = null;
+                                neighborDot = null;
+                            }
+                            state = State.stable;
                         }
+
+                        
                         break;
                     }
 
@@ -229,10 +217,11 @@ public class DotManager : MonoBehaviour {
                             {
                                 if (dot != null)
                                 {
-                                    if (dot.GetComponent<Dot_Mom>().isMatched)
+                                    if (dot.GetComponent<Dot_Mom>().isMatched || dot.GetComponent<Dot_Mom>().isCheckedByColorPop)
                                     {
                                         // howManyDotsDestroy 카운트를 올려 다 터졌는지 검사
-                                        howManyDotsDestroy++;
+                                        if(dot.GetComponent<Dot>() != null)
+                                            howManyDotsDestroy++;
 
                                         // destroyDotTF true로 체크하여 각 Dot의 Dot Script를 통해 제거
                                         dot.GetComponent<Dot_Mom>().destroyDotTF = true;
@@ -382,6 +371,35 @@ public class DotManager : MonoBehaviour {
     {
         howManyDotsMatched = 0;
 
+        if(selectedDot != null && neighborDot != null && (selectedDot.tag == "ColorPop" || neighborDot.tag == "ColorPop"))
+        {
+            if(selectedDot.CompareTag("ColorPop"))
+            {
+                selectedDot.GetComponent<ColorPop_Dot>().ColorPop(neighborDot);
+            }
+            else if (neighborDot.CompareTag("ColorPop"))
+            {
+                neighborDot.GetComponent<ColorPop_Dot>().ColorPop(selectedDot);
+            }
+
+
+            // 탈출 조건
+
+            if (howManyDotsMatched == 0)
+            {
+                matchExist = false;
+            }
+
+            else
+            {
+                matchExist = true;
+            }
+
+            matchDone = true;
+            howManyDotsMatched = 0;
+            return;
+        }
+
         for (int _row = 0; _row < Board.board.height - 2; _row++)
         {
             for (int _column = 0; _column < Board.board.width - 2; _column++)
@@ -401,24 +419,29 @@ public class DotManager : MonoBehaviour {
                             if ((_column + 3 < Board.board.width && Board.board.allDots[_column, _row].gameObject.CompareTag(Board.board.allDots[_column + 3, _row].gameObject.tag))) {
 
                                 // 가로 5개
-                                if (_column + 4 < Board.board.width && Board.board.allDots[_column, _row].gameObject.CompareTag(Board.board.allDots[_column + 4, _row].gameObject.tag))
-                                {
-                                    Debug.Log("5개");
+                                if (_column + 4 < Board.board.width && Board.board.allDots[_column, _row].gameObject.CompareTag(Board.board.allDots[_column + 4, _row].gameObject.tag)) {
+                                  
+                                  Debug.Log("5개");
 
-                                    if(Board.board.allDots[_column + 2,_row].gameObject == selectedDot)
+                                    if(Board.board.allDots[_column + 2, _row].gameObject == selectedDot)
                                     {
-                                        Debug.Log("코루틴 실행");
+                                        Debug.Log("swipe로 코루틴 실행");
+
                                         StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 3));
                                     }
+
                                     else if (Board.board.allDots[_column + 2, _row].gameObject == neighborDot)
                                     {
-                                        Debug.Log("코루틴 실행");
+                                        Debug.Log("swipe로 코루틴 실행");
+
                                         StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(neighborDot.tag, neighborDot.transform.position, 3));
                                     }
+                                    
                                     else
                                     {
-                                        Debug.Log("코루틴 실행");
-                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].gameObject.tag, Board.board.allDots[_column, _row].transform.position, 3));
+                                        Debug.Log("drop으로 코루틴 실행");
+
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].gameObject.tag, Board.board.allDots[_column , _row].transform.position, 3));
                                     }
                                 }
 
@@ -429,21 +452,26 @@ public class DotManager : MonoBehaviour {
                                     Debug.Log("4개");
 
                                     // if selectedDot이 포함되어 있다면 ( Swipe 의 결과로 Special Dot이 Gen 되는거라면 )
-                                    if ((Board.board.allDots[_column + 1, _row].gameObject == selectedDot || Board.board.allDots[_column + 2, _row].gameObject == selectedDot)) {
-                                        Debug.Log("코루틴 실행");
+                                    if ((Board.board.allDots[_column + 1, _row].gameObject == selectedDot || Board.board.allDots[_column + 2, _row].gameObject == selectedDot))
+                                    {
+                                        Debug.Log("swipe로 코루틴 실행");
+
                                         StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 2));
                                     }
 
                                     // if neighborDot이 포함되어 있다면 ( 옆에 Dot을 swipe해서 짝을 맞춘 경우 )
                                     else if ((Board.board.allDots[_column + 1, _row].gameObject == neighborDot || Board.board.allDots[_column + 2, _row].gameObject == neighborDot))
                                     {
-                                        Debug.Log("코루틴 실행");
+                                        Debug.Log("swipe로 코루틴 실행");
+
                                         StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(neighborDot.tag, neighborDot.transform.position, 2));
                                     }
 
                                     // Drop에 의해 Match 된 경우
                                     else
                                     {
+                                        Debug.Log("drop으로 코루틴 실행");
+                                        
                                         StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].tag, Board.board.allDots[_column, _row].transform.position, 2));
                                     }
                                 } 
@@ -460,27 +488,60 @@ public class DotManager : MonoBehaviour {
                             Board.board.allDots[_column, _row + 2].GetComponent<Dot_Mom>().isMatched = true;
 
                             howManyDotsMatched++;
-                            
+
                             // Special Dot에 대해 검사 ( 세로 4개 )
-                            if(_row + 3 < Board.board.height && Board.board.allDots[_column, _row].CompareTag(Board.board.allDots[_column, _row+3].gameObject.tag)) {
-                                Board.board.allDots[_column, _row +3].GetComponent<Dot_Mom>().isMatched = true;
-
-                                Debug.Log("4개");
-
-                                if ((Board.board.allDots[_column, _row + 1].gameObject == selectedDot || Board.board.allDots[_column, _row + 2].gameObject == selectedDot)) {
-                                    Debug.Log("코루틴 실행");
-
-                                    StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 1));
-                                }
-
-                                else if ((Board.board.allDots[_column, _row + 1].gameObject == neighborDot || Board.board.allDots[_column, _row + 2].gameObject == neighborDot))
+                            if (_row + 3 < Board.board.height && Board.board.allDots[_column, _row].CompareTag(Board.board.allDots[_column, _row + 3].gameObject.tag))
+                            {
+                                if (_row + 4 < Board.board.height && Board.board.allDots[_column, _row].CompareTag(Board.board.allDots[_column, _row + 4].gameObject.tag))
                                 {
-                                    Debug.Log("코루틴 실행");
-                                    StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(neighborDot.tag, neighborDot.transform.position, 1));
+                                    Debug.Log("5개");
+
+                                    if ((Board.board.allDots[_column, _row + 3].gameObject == selectedDot && selectedDot != null))
+                                    {
+                                        Debug.Log("swipe로 코루틴 실행");
+
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 3));
+                                    }
+                                    else if (Board.board.allDots[_column, _row + 3].gameObject == neighborDot && selectedDot != null)
+                                    {
+                                        Debug.Log("swipe로 코루틴 실행");
+
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(neighborDot.tag, neighborDot.transform.position, 3));
+                                    }
+                                    else
+                                    {
+                                        Debug.Log("drop으로 코루틴 실행");
+
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].gameObject.tag, Board.board.allDots[_column, _row].transform.position, 3));
+                                    }
                                 }
+
                                 else
                                 {
-                                    StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].tag, Board.board.allDots[_column, _row].transform.position, 2));
+                                    Board.board.allDots[_column, _row + 3].GetComponent<Dot_Mom>().isMatched = true;
+
+                                    Debug.Log("4개");
+
+                                    if ((Board.board.allDots[_column, _row + 1].gameObject == selectedDot || Board.board.allDots[_column, _row + 2].gameObject == selectedDot))
+                                    {
+                                        Debug.Log("swipe로 코루틴 실행");
+
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 1));
+                                    }
+
+                                    else if ((Board.board.allDots[_column, _row + 1].gameObject == neighborDot || Board.board.allDots[_column, _row + 2].gameObject == neighborDot))
+                                    {
+                                        Debug.Log("swipe로 코루틴 실행");
+
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(neighborDot.tag, neighborDot.transform.position, 1));
+                                    }
+
+                                    else
+                                    {
+                                        Debug.Log("drop으로 코루틴 실행");
+
+                                        StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].tag, Board.board.allDots[_column, _row].transform.position, 2));
+                                    }
                                 }
                             }
                         }
@@ -519,16 +580,22 @@ public class DotManager : MonoBehaviour {
                                 // if selectedDot이 포함되어 있다면 ( Swipe 의 결과로 Special Dot이 Gen 되는거라면 )
                                 if ((Board.board.allDots[_column + 1, _row].gameObject == selectedDot || Board.board.allDots[_column + 2, _row].gameObject == selectedDot))
                                 {
-                                    Debug.Log("코루틴 실행");
+                                    Debug.Log("swipe로 코루틴 실행");
+
                                     StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 2));
                                 } 
+
                                 else if ((Board.board.allDots[_column + 1, _row].gameObject == neighborDot || Board.board.allDots[_column + 2, _row].gameObject == neighborDot)) {
-                                    Debug.Log("코루틴 실행");
+                                    Debug.Log("swipe로 코루틴 실행");
+
                                     StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(neighborDot.tag, neighborDot.transform.position, 2));
                                 }
+
                                 // 그냥 4개 매치되면 실행시킬거 (Row, column)이 가장 작은곳에 Spawn 시킴
                                 else
                                 {
+                                    Debug.Log("drop으로 코루틴 실행");
+
                                     StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].tag, Board.board.allDots[_column, _row].transform.position, 2));
                                 }
 
@@ -566,18 +633,21 @@ public class DotManager : MonoBehaviour {
 
                                 if ((Board.board.allDots[_column, _row + 1].gameObject == selectedDot || Board.board.allDots[_column, _row + 2].gameObject == selectedDot))
                                 {
-                                    Debug.Log("코루틴 실행");
+                                    Debug.Log("swipe로 코루틴 실행");
 
                                     StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(selectedDot.tag, selectedDot.transform.position, 1));
                                 }
 
                                 else if ((Board.board.allDots[_column, _row + 1].gameObject == neighborDot || Board.board.allDots[_column, _row + 2].gameObject == neighborDot))
                                 {
-                                    Debug.Log("코루틴 실행");
+                                    Debug.Log("swipe로 코루틴 실행");
+
                                     StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(neighborDot.tag, neighborDot.transform.position, 1));
                                 }
                                 else
                                 {
+                                    Debug.Log("drop으로 코루틴 실행");
+
                                     StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].tag, Board.board.allDots[_column, _row].transform.position, 2));
                                 }
                             }
@@ -585,8 +655,6 @@ public class DotManager : MonoBehaviour {
                     }
                 }
             }
-
-
         }
 
         if(howManyDotsMatched == 0)
@@ -652,83 +720,3 @@ public class DotManager : MonoBehaviour {
         }
     }
 }
-
-/*
-    private IEnumerator DropDotCo()
-    {
-        while(true)
-        {
-            Debug.Log("Yaloo");
-
-            // Destory가 끝난 직후 Drop시키기 위한 Null의 개수를 count
-
-            if (state == State.destoryDone)
-            {
-                Debug.Log("Hi");
-
-                state = State.count;
-
-                CountNulls();
-
-                yield return new WaitForEndOfFrame();
-            }
-
-            // count 가 끝난 후 drop을 직접 수행 + drop 수행중인 경우 계속 진입하여 drop 시킴
-            if (state == State.countDone || state == State.drop)
-            {
-                Debug.Log("Hello");
-
-                state = State.drop;
-
-                for (int _column = 0; _column < Board.board.width; _column++)
-                {
-                    Debug.Log("Yaho");
-
-                    for (int _row = 0; _row < Board.board.height; _row++)
-                    {
-                        if (Board.board.allDots[_column, _row] != null)
-                        {
-                            if (Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().nullCount != 0)
-                            {
-                                Board.board.allDots[_column, _row].transform.Translate(new Vector2(0f, -0.2f));
-
-                                if ((Board.board.allDots[_column, _row].transform.position.y - (Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().row) + Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().nullCount) < 0.05f)
-                                {
-                                    Debug.Log("hi im elfo");
-
-                                    Board.board.allDots[_column, _row].transform.position = new Vector2(Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().column, Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().row - Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().nullCount);
-                                    Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().row = Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().row - Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().nullCount;
-
-                                    //초기화
-                                    int tempNullCount = Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().nullCount;
-
-                                    Board.board.allDots[_column, _row - tempNullCount] = Board.board.allDots[_column, _row];
-
-                                    Board.board.allDots[_column, _row].GetComponent<Dot_Mom>().nullCount = 0;
-                                    Board.board.allDots[_column, _row] = null;
-
-                                    howManyDotsNeedDrop--;
-
-                                    if(howManyDotsNeedDrop == 0)
-                                    {
-                                        state = State.dropDone;
-                                    }
-
-                                    yield return null;
-
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-
-
-            yield return null;
-        }
-        
-    }
-
-}
-*/

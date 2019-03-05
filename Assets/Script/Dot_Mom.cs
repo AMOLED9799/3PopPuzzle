@@ -19,6 +19,7 @@ public class Dot_Mom : MonoBehaviour
     private bool stateChanged = false;
     public bool dot2Drop = false;
     public bool isMatched = false;
+    public bool isCheckedByColorPop = false;
 
     public bool isCheckedForSpecial = false;
     protected bool dominoDone = false;

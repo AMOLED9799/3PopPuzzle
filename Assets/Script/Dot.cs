@@ -21,7 +21,7 @@ public class Dot : Dot_Mom {
         for(; ; )
         {
             // destroyDotTF가 true일 때
-            if (destroyDotTF || destroyedBySpecialDotTF)
+            if (destroyDotTF || destroyedBySpecialDotTF || isCheckedByColorPop)
             {
                 // 1초 기다린 후 (swipe나 drop하는 경우 움직이는 액션을 기다려준다)
                 yield return new WaitForSeconds(0.2f);

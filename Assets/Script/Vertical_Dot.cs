@@ -25,7 +25,7 @@ public class Vertical_Dot : Dot_Mom {
         for (; ; )
         {
             // destroyDotTF가 true일 때
-            if (destroyDotTF || destroyedBySpecialDotTF)
+            if (destroyDotTF || destroyedBySpecialDotTF || isCheckedByColorPop)
             {
                 StartCoroutine(VerticalDominoCo());
 

@@ -15,12 +15,12 @@ public class Horizontal_Dot : Dot_Mom {
 
     }
 
-      protected override IEnumerator DestroyDotCo()
+    protected override IEnumerator DestroyDotCo()
     {
         for (; ; )
         {
             // destroyDotTF가 true일 때
-            if (destroyDotTF || destroyedBySpecialDotTF)
+            if (destroyDotTF || destroyedBySpecialDotTF || isCheckedByColorPop)
             {
                 StartCoroutine(HorizontalDominoCo());
 

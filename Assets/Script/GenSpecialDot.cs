@@ -41,6 +41,10 @@ public class GenSpecialDot : MonoBehaviour {
                                 }
                             }
 
+                            // Debug용, 삭제요망
+                            if (dotNumber == horizontalDots.Length)
+                                break;
+
                             GameObject dot = Instantiate(horizontalDots[dotNumber], genPosition, Quaternion.identity);
 
                             dot.name = "horizontal_Dot";
@@ -63,6 +67,10 @@ public class GenSpecialDot : MonoBehaviour {
                                 }
                             }
 
+                            // Debug 용, 삭제예정
+                            if (dotNumber == horizontalDots.Length)
+                                break;
+
                             GameObject dot = Instantiate(verticalDots[dotNumber], genPosition, Quaternion.identity);
 
                             dot.name = "Vertical_Dot";
@@ -76,6 +84,14 @@ public class GenSpecialDot : MonoBehaviour {
 
                     case 3:
                         {
+                            GameObject dot = Instantiate(specialDots[0], genPosition, Quaternion.identity);
+
+                            dot.name = "ColorPop_Dot";
+
+                            Board.board.allDots[(int)genPosition.x, (int)genPosition.y] = dot;
+                            dot.GetComponent<Dot_Mom>().column = (int)genPosition.x;
+                            dot.GetComponent<Dot_Mom>().row = (int)genPosition.y;
+
                             break;
                         }
                 }
