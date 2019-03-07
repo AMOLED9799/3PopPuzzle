@@ -41,14 +41,18 @@ public class Vertical_Dot : Dot_Mom {
                     yield return new WaitForEndOfFrame();
                 }
 
-                // board를 초기화시키, Dot을 destroy시킨다
-                Board.board.allDots[column, row] = null;
-                Destroy(this.gameObject);
+                if (Board.board.allDots[column, row] != null)
+                {
+                    DotManager.dotManager.howManyDotsDestroy--;
 
-                DotManager.dotManager.howManyDotsDestroy--;
+                    // board를 초기화시키고, Dot을 destroy시킨다
+                    Board.board.allDots[column, row] = null;
+                }
 
                 destroyDotTF = false;
                 destroyedBySpecialDotTF = false;
+
+                Destroy(this.gameObject);
             }
 
             yield return null;
@@ -57,7 +61,7 @@ public class Vertical_Dot : Dot_Mom {
 
     private IEnumerator VerticalDominoCo()
     {
-        for (int _row = 0; _row < Board.board.height; _row++)
+        for (int _row = 1; _row < Board.board.height; _row++)
         {
             if (row - _row < 0 && row + _row >= Board.board.height)
             {
@@ -82,11 +86,7 @@ public class Vertical_Dot : Dot_Mom {
                     DotManager.dotManager.howManyDotsDestroy++;
                 }
             }
-
-            Debug.Log(Board.board.height);
             yield return new WaitForSeconds(0.01f);
-            Debug.Log(row.ToString());
-
         }
 
         dominoDone = true;

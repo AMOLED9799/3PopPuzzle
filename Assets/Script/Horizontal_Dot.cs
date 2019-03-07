@@ -36,14 +36,18 @@ public class Horizontal_Dot : Dot_Mom {
                     yield return new WaitForEndOfFrame();
                 }
 
-                // board를 초기화시키, Dot을 destroy시킨다
-                Board.board.allDots[column, row] = null;
-                Destroy(this.gameObject);
+                if (Board.board.allDots[column, row] != null)
+                {
+                    DotManager.dotManager.howManyDotsDestroy--;
 
-                DotManager.dotManager.howManyDotsDestroy--;
-
+                    // board를 초기화시키, Dot을 destroy시킨다
+                    Board.board.allDots[column, row] = null;
+                }
+                
                 destroyDotTF = false;
                 destroyedBySpecialDotTF = false;
+
+                Destroy(this.gameObject);
             }
 
             yield return null;

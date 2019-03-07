@@ -144,7 +144,6 @@ public class DotManager : MonoBehaviour {
 
                 case State.checkMatch:
                     {
-
                         // 모든 매치검사를 실행
                         MatchingDot();
 
@@ -158,7 +157,6 @@ public class DotManager : MonoBehaviour {
                             startState = true;
                             state = State.destroyMatch;
                         }
-
 
                         // match 결과 match가 없을 때 => Swipe한 Dot이 다시 자기 자리로 돌아가야함
                         else if (!matchExist && matchDone)
@@ -220,8 +218,7 @@ public class DotManager : MonoBehaviour {
                                     if (dot.GetComponent<Dot_Mom>().isMatched || dot.GetComponent<Dot_Mom>().isCheckedByColorPop)
                                     {
                                         // howManyDotsDestroy 카운트를 올려 다 터졌는지 검사
-                                        if(dot.GetComponent<Dot>() != null)
-                                            howManyDotsDestroy++;
+                                        howManyDotsDestroy++;
 
                                         // destroyDotTF true로 체크하여 각 Dot의 Dot Script를 통해 제거
                                         dot.GetComponent<Dot_Mom>().destroyDotTF = true;
@@ -248,7 +245,7 @@ public class DotManager : MonoBehaviour {
                             // 자기가 갈 위치에 미리 Column, Row를 옮겨놓음
                             // Refill할 Dot까지 미리 Positioning 해 놓기
 
-                            CountNullsIndividual();
+                            CountNullsIndividual(); 
 
                             // 모든 dot에 대해 drop 코루틴을 실행시킨다.
                             foreach (GameObject dot in Board.board.allDots)
@@ -362,10 +359,8 @@ public class DotManager : MonoBehaviour {
         return;
     }
 
-
+    
     // Board.board 의 allDots[]에 column, row 가 바뀌어 있는 상태에서 좌표를 목적지로 하여 Dot 이미지를 이동시키는 메서드
-
-
 
     private void MatchingDot()
     {
@@ -598,8 +593,6 @@ public class DotManager : MonoBehaviour {
 
                                     StartCoroutine(GenSpecialDot.genSpecialDot.GenSpecialDotCo(Board.board.allDots[_column, _row].tag, Board.board.allDots[_column, _row].transform.position, 2));
                                 }
-
-
                             }
                         }
                     }

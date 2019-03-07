@@ -29,7 +29,7 @@ public class GenSpecialDot : MonoBehaviour {
 			if(Board.board.allDots[(int)genPosition.x, (int)genPosition.y] == null) {
                 switch (direction)
                 {
-                    case 1: // Vertical
+                    case 1: // Horizontal
                         {
                             int dotNumber = 0;
                             for (dotNumber = 0; dotNumber < horizontalDots.Length; dotNumber++)
@@ -56,7 +56,7 @@ public class GenSpecialDot : MonoBehaviour {
                             break;
                         }
 
-                    case 2:
+                    case 2: // Vertical
                         {
                             int dotNumber = 0;
                             for (dotNumber = 0; dotNumber < horizontalDots.Length; dotNumber++)
@@ -82,7 +82,7 @@ public class GenSpecialDot : MonoBehaviour {
                             break;
                         }
 
-                    case 3:
+                    case 3: // ColorPop
                         {
                             GameObject dot = Instantiate(specialDots[0], genPosition, Quaternion.identity);
 

@@ -33,14 +33,20 @@ public class Dot : Dot_Mom {
                 // 0.5초 후에
                 yield return new WaitForSeconds(0.3f);
 
-                // board를 초기화시키, Dot을 destroy시킨다
-                Board.board.allDots[column, row] = null;
-                Destroy(this.gameObject);
+                if (Board.board.allDots[column, row] != null)
+                {
+                    DotManager.dotManager.howManyDotsDestroy--;
 
-                DotManager.dotManager.howManyDotsDestroy--;
+                    // board를 초기화시키고, Dot을 destroy시킨다
+                    Board.board.allDots[column, row] = null;
+                }
 
                 destroyDotTF = false;
                 destroyedBySpecialDotTF = false;
+
+                Destroy(this.gameObject);
+
+
             }
 
             yield return null;

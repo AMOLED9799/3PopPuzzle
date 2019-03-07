@@ -32,14 +32,19 @@ public class ColorPop_Dot : Dot_Mom {
                 SpriteRenderer sprite = GetComponent<SpriteRenderer>();
                 sprite.color = new Color(0.5f, 0.5f, 0.5f);
 
-                // board를 초기화시키, Dot을 destroy시킨다
-                Board.board.allDots[column, row] = null;
-                Destroy(this.gameObject);
+                if (Board.board.allDots[column, row] != null)
+                {
+                    DotManager.dotManager.howManyDotsDestroy--;
 
-                DotManager.dotManager.howManyDotsDestroy--;
+                    // board를 초기화시키, Dot을 destroy시킨다
+                    Board.board.allDots[column, row] = null;
+                }
 
                 destroyDotTF = false;
                 destroyedBySpecialDotTF = false;
+
+                Destroy(this.gameObject);
+
             }
 
             yield return null;
@@ -59,6 +64,8 @@ public class ColorPop_Dot : Dot_Mom {
                 DotManager.dotManager.howManyDotsMatched++;
             }
         }
+
+        this.isCheckedByColorPop = true;
 
         return;
     }

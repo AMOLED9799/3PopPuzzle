@@ -21,7 +21,7 @@ public class Dot_Mom : MonoBehaviour
     public bool isMatched = false;
     public bool isCheckedByColorPop = false;
 
-    public bool isCheckedForSpecial = false;
+    public bool isCheckedForColorPop = false;
     protected bool dominoDone = false;
 
     public Vector2 velocity = Vector2.zero;
